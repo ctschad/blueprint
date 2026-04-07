@@ -1,0 +1,23 @@
+[
+  {
+    "handle": "dont-die-january",
+    "title": "Don't Die January",
+    "description": "On the surface, Blueprint may seem something about health, wellness and aging. It's really a system to make tomorrow better for you, me, the planet and our shared future with AI.",
+    "image": "https://blueprint.bryanjohnson.com/cdn/shop/files/Blueprint_Bryan_Johnson.webp?v=1772576275",
+    "legacyPath": "/legacy/blogs/dont-die-january.html"
+  },
+  {
+    "handle": "news",
+    "title": "News",
+    "description": "On the surface, Blueprint may seem something about health, wellness and aging. It's really a system to make tomorrow better for you, me, the planet and our shared future with AI.",
+    "image": "https://blueprint.bryanjohnson.com/cdn/shop/files/Blueprint_Bryan_Johnson.webp?v=1772576275",
+    "legacyPath": "/legacy/blogs/news.html"
+  },
+  {
+    "handle": "recipes",
+    "title": "Recipes",
+    "description": "On the surface, Blueprint may seem something about health, wellness and aging. It's really a system to make tomorrow better for you, me, the planet and our shared future with AI.",
+    "image": "https://blueprint.bryanjohnson.com/cdn/shop/files/Blueprint_Bryan_Johnson.webp?v=1772576275",
+    "legacyPath": "/legacy/blogs/recipes.html"
+  }
+]

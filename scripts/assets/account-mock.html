@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Account | Blueprint Bryan Johnson</title>
+    <meta name="robots" content="noindex">
+    <link rel="icon" href="/blueprint.bryanjohnson.com/cdn/shop/files/logo__favicon__new-day-bg-navy-b__q_ee0e70103c21.png">
+    <link rel="stylesheet" href="/blueprint.bryanjohnson.com/cdn/shop/t/445/assets/account-local-mock.css">
+  </head>
+  <body class="local-account-body">
+    <main class="local-account-shell">
+      <header class="local-account-topbar local-account-card">
+        <a class="local-account-brand" href="/blueprint.bryanjohnson.com/index.html">
+          <img src="/blueprint.bryanjohnson.com/cdn/shop/files/Logo_Blueprint_Bryan_Johnson_Stacked__q_4a911b96bf08.svg" alt="Blueprint Bryan Johnson">
+          <span class="local-account-brand-copy">
+            <span class="local-account-brand-label">Local mirror</span>
+            <span class="local-account-brand-title">Mock account backend</span>
+          </span>
+        </a>
+        <nav class="local-account-nav" aria-label="Account sandbox navigation">
+          <a href="/blueprint.bryanjohnson.com/index.html">Home</a>
+          <a href="/blueprint.bryanjohnson.com/collections/all-products.html">Shop all</a>
+          <a href="/blueprint.bryanjohnson.com/account.html" aria-current="page">Account</a>
+        </nav>
+      </header>
+
+      <section class="local-account-hero">
+        <p class="local-account-hero-kicker">Customer account preview</p>
+        <h1 id="mock-hero-title">Local account sandbox</h1>
+        <p id="mock-hero-subtitle">Preview account-only states without talking to Shopify.</p>
+        <div class="local-account-hero-row">
+          <div class="local-account-pill-row" id="mock-hero-pills"></div>
+        </div>
+      </section>
+
+      <section class="local-account-layout">
+        <aside class="local-account-sidebar">
+          <div class="local-account-sidebar-card local-account-card">
+            <span class="local-account-session-chip" id="mock-session-chip" data-session="signed-out">Signed out</span>
+            <div class="local-account-sidebar-meta">
+              <h2 id="mock-session-title">Guest session</h2>
+              <p id="mock-session-copy">Mock mode is active.</p>
+              <p id="mock-member-since"></p>
+            </div>
+            <nav class="local-account-side-links" id="mock-side-links" aria-label="Account sections"></nav>
+            <div class="local-account-side-actions">
+              <button class="local-account-ghost-button" id="mock-signout-button" type="button" hidden>Sign out</button>
+              <button class="local-account-ghost-button" id="mock-reset-button" type="button">Reset mock data</button>
+            </div>
+          </div>
+
+          <div class="local-account-sidebar-card local-account-card">
+            <h2>About this mock</h2>
+            <p class="local-account-note">This page is intentionally local-only. It is meant to unblock account UI work inside the mirrored storefront without needing Shopify customer accounts or checkout infrastructure.</p>
+            <p class="local-account-footer">State persistence: browser localStorage only.</p>
+          </div>
+        </aside>
+
+        <section class="local-account-content" id="mock-content"></section>
+      </section>
+    </main>
+
+    <script src="/blueprint.bryanjohnson.com/cdn/shop/t/445/assets/account-local-mock.js" defer></script>
+  </body>
+</html>
