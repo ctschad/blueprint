@@ -2331,7 +2331,7 @@ button {
 .protocol-quiz-hero__card {
   position: absolute;
   left: 50%;
-  top: clamp(1rem, 3vw, 1.75rem);
+  top: clamp(2rem, 4vw, 3.25rem);
   transform: translateX(-50%);
   width: min(58rem, calc(100% - 2rem));
   padding: clamp(1.5rem, 3vw, 2.35rem) clamp(1.5rem, 3vw, 2.4rem);
@@ -2347,8 +2347,15 @@ button {
   text-align: center;
 }
 
+.protocol-quiz-hero__card--intro h1 {
+  max-width: 50rem;
+  margin-inline: auto;
+}
+
 .protocol-quiz-hero__card--intro p:not(.protocol-quiz-hero__eyebrow) {
-  max-width: 34rem;
+  max-width: 40rem;
+  margin-inline: auto;
+  line-height: 1.45;
 }
 
 .protocol-quiz-hero__card--intro .protocol-quiz-hero__actions {
