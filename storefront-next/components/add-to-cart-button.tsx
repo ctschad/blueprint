@@ -14,6 +14,7 @@ type Props = {
   className?: string;
   disabled?: boolean;
   label?: string;
+  trailingLabel?: string;
 };
 
 export function AddToCartButton({
@@ -26,10 +27,12 @@ export function AddToCartButton({
   image,
   className,
   disabled,
-  label = "Add to Cart"
+  label = "Add to Cart",
+  trailingLabel
 }: Props) {
   const { addItem } = useCart();
   const [added, setAdded] = useState(false);
+  const buttonLabel = disabled ? "Unavailable" : added ? "Added" : label;
 
   return (
     <button
@@ -52,7 +55,14 @@ export function AddToCartButton({
         window.setTimeout(() => setAdded(false), 1400);
       }}
     >
-      {disabled ? "Unavailable" : added ? "Added" : label}
+      {trailingLabel && !disabled && !added ? (
+        <>
+          <span className="button__label">{buttonLabel}</span>
+          <span className="button__trailing">{trailingLabel}</span>
+        </>
+      ) : (
+        buttonLabel
+      )}
     </button>
   );
 }

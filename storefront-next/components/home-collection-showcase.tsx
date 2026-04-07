@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { ProductCard } from "@/components/product-card";
+import Link from "next/link";
+import { AddToCartButton } from "@/components/add-to-cart-button";
+import { formatMoney } from "@/lib/storefront";
 import type { Product } from "@/lib/types";
 
 type Tab = {
@@ -10,6 +12,43 @@ type Tab = {
   description: string;
   products: Product[];
 };
+
+function BenefitProductCard({ product }: { product: Product }) {
+  const variant = product.variants.find((item) => item.available) ?? product.variants[0];
+  const image = product.images[0];
+
+  return (
+    <article className="benefit-product-card">
+      <Link href={`/products/${product.handle}`} className="benefit-product-card__image-wrap">
+        {image ? <img src={image.src} alt={image.alt} className="benefit-product-card__image" /> : null}
+      </Link>
+
+      <div className="benefit-product-card__body">
+        <Link href={`/products/${product.handle}`} className="benefit-product-card__title">
+          {product.title}
+        </Link>
+        {product.keywords ? <p className="benefit-product-card__keywords">{product.keywords}</p> : null}
+        <p className="benefit-product-card__price">{formatMoney(product.priceMin)}</p>
+
+        {variant ? (
+          <AddToCartButton
+            className="button button--solid button--full"
+            productHandle={product.handle}
+            productTitle={product.title}
+            variantId={variant.id}
+            variantTitle={variant.publicTitle || variant.title}
+            price={variant.price}
+            image={image?.src}
+          />
+        ) : (
+          <Link href={`/products/${product.handle}`} className="button button--ghost button--full">
+            View Details
+          </Link>
+        )}
+      </div>
+    </article>
+  );
+}
 
 export function HomeCollectionShowcase({ tabs }: { tabs: Tab[] }) {
   const [activeHandle, setActiveHandle] = useState(tabs[0]?.handle ?? "");
@@ -20,23 +59,19 @@ export function HomeCollectionShowcase({ tabs }: { tabs: Tab[] }) {
   }
 
   return (
-    <section className="shell page-section">
-      <div className="page-heading">
-        <div>
-          <p className="eyebrow">Every product is designed for every body</p>
-          <h2>Shop by outcome.</h2>
-        </div>
-        <p className="section-copy">
-          Move from daily essentials to more targeted support without losing the simplicity of the routine.
-        </p>
+    <section className="shell page-section benefit-showcase">
+      <div className="benefit-showcase__heading">
+        <h2>
+          Your needs, <span className="benefit-showcase__highlight">fully supported</span>
+        </h2>
       </div>
 
-      <div className="tab-list" role="tablist" aria-label="Collection showcase">
+      <div className="benefit-showcase__tabs" role="tablist" aria-label="Shop by benefit">
         {tabs.map((tab) => (
           <button
             key={tab.handle}
             type="button"
-            className={`tab-list__button ${tab.handle === activeTab.handle ? "is-active" : ""}`}
+            className={`benefit-showcase__tab ${tab.handle === activeTab.handle ? "is-active" : ""}`}
             onClick={() => setActiveHandle(tab.handle)}
           >
             {tab.label}
@@ -44,11 +79,9 @@ export function HomeCollectionShowcase({ tabs }: { tabs: Tab[] }) {
         ))}
       </div>
 
-      <p className="section-copy section-copy--narrow">{activeTab.description}</p>
-
-      <div className="product-grid">
+      <div className="benefit-showcase__grid">
         {activeTab.products.slice(0, 5).map((product) => (
-          <ProductCard key={product.handle} product={product} />
+          <BenefitProductCard key={product.handle} product={product} />
         ))}
       </div>
     </section>

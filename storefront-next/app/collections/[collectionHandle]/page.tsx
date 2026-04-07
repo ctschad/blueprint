@@ -1,9 +1,29 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ProductCard } from "@/components/product-card";
+import type { ReactNode } from "react";
+import { CollectionProductCard } from "@/components/collection-product-card";
 import { getCollectionByHandle, getProductsForCollection, sortProducts } from "@/lib/storefront";
+import type { Collection } from "@/lib/types";
 
 type Params = Promise<{ collectionHandle: string }>;
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
+
+const BENEFIT_COLLECTION_HANDLES = [
+  "daily-health-longevity",
+  "brain-heart-health",
+  "energy-stress-support",
+  "muscle-performance-recovery",
+  "nutritional-support",
+  "gut-immune-support",
+  "hair-and-skin-care"
+] as const;
+
+const SORT_OPTIONS = [
+  { value: "featured", label: "Most Popular" },
+  { value: "newest", label: "Newest" },
+  { value: "price-desc", label: "Price, high-low" },
+  { value: "price-asc", label: "Price, low-high" }
+] as const;
 
 export default async function CollectionPage({
   params,
@@ -14,7 +34,6 @@ export default async function CollectionPage({
 }) {
   const { collectionHandle } = await params;
   const queryParams = await searchParams;
-  const query = typeof queryParams.q === "string" ? queryParams.q : "";
   const sort = typeof queryParams.sort === "string" ? queryParams.sort : "featured";
 
   const collection = getCollectionByHandle(collectionHandle);
@@ -22,67 +41,121 @@ export default async function CollectionPage({
     notFound();
   }
 
-  let products = getProductsForCollection(collectionHandle);
-  if (query) {
-    const normalized = query.toLowerCase();
-    products = products.filter((product) =>
-      [product.title, product.summary, product.keywords, product.tags.join(" ")]
-        .join(" ")
-        .toLowerCase()
-        .includes(normalized)
-    );
-  }
-  products = sortProducts(products, sort);
+  const benefitCollections = BENEFIT_COLLECTION_HANDLES.map((handle) => getCollectionByHandle(handle)).filter(
+    (item): item is Collection => Boolean(item)
+  );
+  const products = sortProducts(getProductsForCollection(collectionHandle), sort);
+  const activeSortLabel = SORT_OPTIONS.find((option) => option.value === sort)?.label ?? "Most Popular";
+  const promoInsertIndex = Math.min(3, products.length);
 
   return (
-    <section className="shell page-section">
-      <div className="collection-hero">
-        <div className="page-heading">
-          <div>
-            <p className="eyebrow">Collection</p>
-            <h1>{collection.title}</h1>
-          </div>
-          <p className="section-copy section-copy--narrow">
-            {collection.description || "Explore everything in this collection."}
+    <section className="shell page-section collection-page">
+      <div className="collection-page__header">
+        <div className="collection-page__intro">
+          <h1 className="collection-page__title">{collection.title}</h1>
+          <p className="collection-page__description">
+            {collection.description || "Explore Bryan Johnson's longevity protocols in this collection."}
           </p>
         </div>
-        {collection.image ? <img src={collection.image} alt={collection.title} className="collection-hero__image" /> : null}
+
+        <details className="collection-sort">
+          <summary className="collection-sort__trigger">
+            <span>Sort By</span>
+            <span className="collection-sort__value">{activeSortLabel}</span>
+          </summary>
+
+          <div className="collection-sort__menu">
+            {SORT_OPTIONS.map((option) => (
+              <Link
+                key={option.value}
+                href={`/collections/${collectionHandle}${option.value === "featured" ? "" : `?sort=${option.value}`}`}
+                className="collection-sort__option"
+              >
+                <span className={`collection-sort__check ${sort === option.value ? "is-active" : ""}`} />
+                <span>{option.label}</span>
+              </Link>
+            ))}
+          </div>
+        </details>
       </div>
 
-      <form action={`/collections/${collectionHandle}`} className="catalog-toolbar">
-        <label className="field field--inline">
-          <span>Search within collection</span>
-          <input name="q" defaultValue={query} placeholder="filter products" />
-        </label>
-        <label className="field field--inline">
-          <span>Sort</span>
-          <select name="sort" defaultValue={sort}>
-            <option value="featured">Featured</option>
-            <option value="rating">Top rated</option>
-            <option value="price-asc">Price: low to high</option>
-            <option value="price-desc">Price: high to low</option>
-            <option value="title">Alphabetical</option>
-          </select>
-        </label>
-        <button type="submit" className="button button--solid">
-          Apply
-        </button>
-      </form>
+      <div className="collection-page__layout">
+        <aside className="collection-sidebar">
+          <div className="collection-filter">
+            <div className="collection-filter__heading">
+              <h2>Shop by Benefit</h2>
+              <span className="collection-filter__caret">⌃</span>
+            </div>
 
-      <p className="catalog-count">{products.length} products</p>
+            <div className="collection-filter__options">
+              {benefitCollections.map((benefitCollection) => {
+                const isActive = benefitCollection.handle === collectionHandle;
 
-      {products.length ? (
-        <div className="product-grid">
-          {products.map((product) => (
-            <ProductCard key={product.handle} product={product} />
-          ))}
+                return (
+                  <Link
+                    key={benefitCollection.handle}
+                    href={`/collections/${benefitCollection.handle}`}
+                    className={`collection-filter__option ${isActive ? "is-active" : ""}`}
+                  >
+                    <span className={`collection-filter__checkbox ${isActive ? "is-active" : ""}`} />
+                    <span>{benefitCollection.title}</span>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        </aside>
+
+        <div className="collection-page__products">
+          <div className="collection-products-grid">
+            {products.map((product, index) => (
+              <FragmentWithPromo
+                key={product.handle}
+                index={index}
+                promoInsertIndex={promoInsertIndex}
+                productCard={<CollectionProductCard product={product} />}
+              />
+            ))}
+            {products.length > 0 && promoInsertIndex === products.length ? <BuildYourStackPromoCard /> : null}
+          </div>
+
+          {!products.length ? (
+            <div className="search-empty collection-page__empty">
+              <h2>No products found in this collection.</h2>
+              <p>Try another category or browse all products instead.</p>
+            </div>
+          ) : null}
         </div>
-      ) : (
-        <div className="empty-state">
-          <h2>No products found in this collection.</h2>
-          <p>Try a different query or return to the full catalog.</p>
-        </div>
-      )}
+      </div>
     </section>
+  );
+}
+
+function FragmentWithPromo({
+  index,
+  promoInsertIndex,
+  productCard
+}: {
+  index: number;
+  promoInsertIndex: number;
+  productCard: ReactNode;
+}) {
+  return (
+    <>
+      {index === promoInsertIndex ? <BuildYourStackPromoCard /> : null}
+      {productCard}
+    </>
+  );
+}
+
+function BuildYourStackPromoCard() {
+  return (
+    <Link href="/pages/build-my-stack" className="collection-promo-card">
+      <div className="collection-promo-card__inner">
+        <h2>Build your longevity stack</h2>
+        <p>Save when you subscribe to your custom protocol.</p>
+        <span className="collection-promo-card__button">Build your stack</span>
+      </div>
+    </Link>
   );
 }

@@ -98,11 +98,46 @@ export const shopByBenefitMenu = {
 } as const;
 
 export const homeContent = {
+  topBanner: {
+    title: "Longevity protocols from Bryan Johnson",
+    description: "Science-backed, precision-dosed, no BS",
+    ctaLabel: "Get Yours",
+    ctaHref: "/collections/all-products",
+    image: {
+      src: "/media/home/home-top-banner.jpg",
+      alt: "Longevity Mix pouch and Essential Capsules bottle on a concrete surface"
+    }
+  },
+  everyBodyBanner: {
+    titleLineOne: "Every product is",
+    titleLineTwo: "designed for every",
+    emphasis: "body.",
+    image: {
+      src: "/media/home/every-body-banner.jpg",
+      alt: "Four people standing together against a blue sky"
+    },
+    items: [
+      { key: "studies" as const, label: "BUILT ON POPULATION LEVEL STUDIES" },
+      { key: "life" as const, label: "EVERY INGREDIENT FOUGHT FOR ITS LIFE™" },
+      { key: "experts" as const, label: "ENGINEERED BY LONGEVITY EXPERTS AND DOCTORS" }
+    ]
+  },
+  newsletter: {
+    eyebrow: "Blueprint Newsletter",
+    heading: "Health protocols that actually work",
+    description: "We will teach you how to be healthy, for free.",
+    placeholder: "Your email address",
+    image: {
+      src: "/media/home/newsletter-signup.jpg",
+      alt: "Woman in a light blue sweater against a dark blue sky"
+    }
+  },
   hero: {
-    heading: "The world's most tested longevity products.",
-    title: "Our standards",
+    eyebrow: "Clinically-backed ingredients",
+    heading: "The world's most tested longevity protocols.",
     description:
-      "90% of supplements are mislabeled and full of hidden toxins. We test every ingredient, publish every result, and keep transparency a non-negotiable.",
+      "The food system is broken. Up to 90% of supplements are mislabeled and full of hidden toxins. We test every ingredient, publish every result, and make transparency non-negotiable.",
+    title: "Our Standards",
     resultsLabel: "View Our Test Results",
     resultsHref: "/pages/coas",
     footnote: "*COAs are property of Blueprint and are not to be used without Blueprint's consent.",
@@ -110,30 +145,32 @@ export const homeContent = {
       src: "/media/home/our-standards-petri-dishes.jpg",
       alt: "Four glass bowls containing different powders and liquids on a light stone surface"
     },
-    secondaryCard: {
-      title: "What you will not find inside.",
-      items: [
-        {
-          title: "No Label Fluff",
-          description: "Marketing claims that sound impressive but do not hold up under scrutiny."
-        },
-        {
-          title: "No Pixie Dusting",
-          description: "Ingredients added at doses too small to matter, just to decorate the label."
-        },
-        {
-          title: "No Shortcuts",
-          description: "We test for heavy metals, toxins, and contaminants that other brands often ignore."
-        }
-      ]
-    }
+    capsuleImage: {
+      src: "/media/home/standards-capsule.png",
+      alt: "Transparent capsule filled with antioxidant powder"
+    },
+    items: [
+      {
+        title: "No Label Fluff",
+        description: "Marketing claims on products that are suspicious and misleading."
+      },
+      {
+        title: "No Pixie Dusting",
+        description: "Ingredients added at doses too small to matter, just to decorate the label."
+      },
+      {
+        title: "No Shortcuts",
+        description: "We test for heavy metals, toxins, and contaminants that other brands often ignore."
+      }
+    ]
   },
   collectionTabs: [
     { handle: "daily-health-longevity", label: "Daily Health & Longevity" },
     { handle: "brain-heart-health", label: "Brain & Heart Health" },
     { handle: "energy-stress-support", label: "Energy & Stress Support" },
     { handle: "muscle-performance-recovery", label: "Muscle Performance & Recovery" },
-    { handle: "gut-immune-support", label: "Gut & Immune Support" },
+    { handle: "nutritional-support", label: "Nutritional Support" },
+    { handle: "gut-immune-support", label: "Gut & Immune Health Support" },
     { handle: "hair-and-skin-care", label: "Hair & Skin Care" }
   ],
   bodyCollections: [

@@ -1,7 +1,11 @@
-import { ProductCard } from "@/components/product-card";
-import { searchProducts, sortProducts } from "@/lib/storefront";
+import { SearchExperience } from "@/components/search-experience";
+import { getAllArticles, getAllProducts, getProductsByHandles } from "@/lib/storefront";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
+
+function toPlainText(value: string) {
+  return value.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+}
 
 export default async function SearchPage({
   searchParams
@@ -10,55 +14,75 @@ export default async function SearchPage({
 }) {
   const params = await searchParams;
   const query = typeof params.q === "string" ? params.q : "";
-  const sort = typeof params.sort === "string" ? params.sort : "featured";
-  const results = sortProducts(searchProducts(query), sort);
+
+  const products = getAllProducts().map((product) => ({
+    handle: product.handle,
+    title: product.title,
+    summary: product.summary,
+    keywords: product.keywords,
+    vendor: product.vendor,
+    priceMin: product.priceMin,
+    rating: product.rating ?? null,
+    reviewsCount: product.reviewsCount ?? null,
+    image: product.images[0]?.src ?? null,
+    searchText: [
+      product.title,
+      product.summary,
+      product.keywords,
+      product.type,
+      product.vendor,
+      product.tags.join(" "),
+      product.collectionHandles.join(" "),
+      toPlainText(product.descriptionHtml).slice(0, 900)
+    ]
+      .join(" ")
+      .toLowerCase()
+  }));
+
+  const favorites = getProductsByHandles([
+    "longevity-blend-multinutrient-drink-mix-blood-orange-flavor",
+    "essentials-capsules",
+    "advanced-antioxidants",
+    "extra-virgin-olive-oil"
+  ]).map((product) => ({
+    handle: product.handle,
+    title: product.title,
+    summary: product.summary,
+    keywords: product.keywords,
+    vendor: product.vendor,
+    priceMin: product.priceMin,
+    rating: product.rating ?? null,
+    reviewsCount: product.reviewsCount ?? null,
+    image: product.images[0]?.src ?? null,
+    searchText: [
+      product.title,
+      product.summary,
+      product.keywords,
+      product.type,
+      product.vendor,
+      product.tags.join(" "),
+      product.collectionHandles.join(" "),
+      toPlainText(product.descriptionHtml).slice(0, 900)
+    ]
+      .join(" ")
+      .toLowerCase()
+  }));
+
+  const articles = getAllArticles().map((article) => ({
+    href: `/blogs/${article.blogHandle}/${article.slug}`,
+    title: article.title,
+    image: article.image ?? null,
+    searchText: [article.title, article.description, article.tags.join(" "), toPlainText(article.bodyHtml).slice(0, 1200)]
+      .join(" ")
+      .toLowerCase()
+  }));
 
   return (
-    <section className="shell page-section">
-      <div className="page-heading">
-        <div>
-          <p className="eyebrow">Search</p>
-          <h1>Find a product</h1>
-        </div>
-        <p className="section-copy">Search by product, benefit, or ingredient.</p>
-      </div>
-
-      <form action="/search" className="catalog-toolbar">
-        <label className="field field--inline">
-          <span>Query</span>
-          <input name="q" defaultValue={query} placeholder="olive oil, protein, cognition..." />
-        </label>
-        <label className="field field--inline">
-          <span>Sort</span>
-          <select name="sort" defaultValue={sort}>
-            <option value="featured">Featured</option>
-            <option value="rating">Top rated</option>
-            <option value="price-asc">Price: low to high</option>
-            <option value="price-desc">Price: high to low</option>
-            <option value="title">Alphabetical</option>
-          </select>
-        </label>
-        <button type="submit" className="button button--solid">
-          Search
-        </button>
-      </form>
-
-      <p className="catalog-count">
-        {query ? `Results for “${query}”` : "Showing the full catalog"} · {results.length} products
-      </p>
-
-      {results.length ? (
-        <div className="product-grid">
-          {results.map((product) => (
-            <ProductCard key={product.handle} product={product} />
-          ))}
-        </div>
-      ) : (
-        <div className="empty-state">
-          <h2>No products matched that search.</h2>
-          <p>Try a different term or browse the collections directly.</p>
-        </div>
-      )}
-    </section>
+    <SearchExperience
+      initialQuery={query}
+      products={products}
+      favorites={favorites}
+      articles={articles}
+    />
   );
 }

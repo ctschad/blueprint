@@ -33,6 +33,10 @@ export function getAllProducts() {
   return products;
 }
 
+export function getAllArticles() {
+  return articles;
+}
+
 export function getAllCollections() {
   return collections;
 }
@@ -180,6 +184,8 @@ export function cleanRichText(markup: string) {
 export function sortProducts(productsToSort: Product[], sort: string) {
   const copy = [...productsToSort];
   switch (sort) {
+    case "newest":
+      return copy.sort((left, right) => right.id - left.id);
     case "price-asc":
       return copy.sort((left, right) => left.priceMin - right.priceMin);
     case "price-desc":

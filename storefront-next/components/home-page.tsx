@@ -1,6 +1,10 @@
 import Link from "next/link";
+import { BestsellersCarousel } from "@/components/bestsellers-carousel";
+import { EveryBodyBanner } from "@/components/every-body-banner";
 import { HomeCollectionShowcase } from "@/components/home-collection-showcase";
-import { ProductCard } from "@/components/product-card";
+import { NewsletterSignup } from "@/components/newsletter-signup";
+import { RoutineCarousel } from "@/components/routine-carousel";
+import { StandardsFeature } from "@/components/standards-feature";
 import { TestimonialCarousel } from "@/components/testimonial-carousel";
 import { homeContent } from "@/lib/home-content";
 import { getCollectionByHandle, getProductByHandle, getProductsForCollection } from "@/lib/storefront";
@@ -25,54 +29,42 @@ export function HomePage() {
     .map((handle) => getCollectionByHandle(handle))
     .filter((collection): collection is NonNullable<typeof collection> => Boolean(collection));
 
-  const bestsellers = getProductsForCollection("bestsellers").slice(0, 5);
+  const bestsellers = getProductsForCollection("bestsellers");
   const routineProducts = homeContent.routineHandles
     .map((handle) => getProductByHandle(handle))
     .filter((product): product is NonNullable<typeof product> => Boolean(product));
 
   return (
     <>
-      <section className="hero">
-        <div className="shell">
-          <div className="hero__stage">
-            <h1 className="sr-only">{homeContent.hero.heading}</h1>
-
-            <div className="hero__media">
-              <img
-                src={homeContent.hero.image.src}
-                alt={homeContent.hero.image.alt}
-                className="hero__media-image"
-              />
-            </div>
-
-            <div className="hero__cards">
-              <div className="hero__card">
-                <div className="hero__card-body">
-                  <h2 className="hero__card-title">{homeContent.hero.title}</h2>
-                  <p className="hero__card-copy">{homeContent.hero.description}</p>
-                  <Link href={homeContent.hero.resultsHref} className="hero__results-link">
-                    {homeContent.hero.resultsLabel}
-                  </Link>
-                  <p className="hero__footnote">{homeContent.hero.footnote}</p>
-                </div>
-              </div>
-
-              <aside className="hero__ingredient-card" aria-label={homeContent.hero.secondaryCard.title}>
-                <div className="hero__ingredient-card-body">
-                  <h2 className="hero__ingredient-card-title">{homeContent.hero.secondaryCard.title}</h2>
-                  <div className="hero__ingredient-list">
-                    {homeContent.hero.secondaryCard.items.map((item) => (
-                      <div key={item.title} className="hero__ingredient-item">
-                        <h3>{item.title}</h3>
-                        <p>{item.description}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </aside>
-            </div>
+      <section className="shell home-top-banner">
+        <div className="home-top-banner__inner">
+          <img
+            src={homeContent.topBanner.image.src}
+            alt={homeContent.topBanner.image.alt}
+            className="home-top-banner__image"
+          />
+          <div className="home-top-banner__overlay" />
+          <div className="home-top-banner__content">
+            <h2>{homeContent.topBanner.title}</h2>
+            <p>{homeContent.topBanner.description}</p>
+            <Link href={homeContent.topBanner.ctaHref} className="button button--solid home-top-banner__cta">
+              {homeContent.topBanner.ctaLabel}
+            </Link>
           </div>
         </div>
+      </section>
+
+      <section className="shell page-section">
+        <div className="page-heading">
+          <div>
+            <p className="eyebrow">Excellence. Made effortless.</p>
+            <h2>The routine, at a glance.</h2>
+          </div>
+          <p className="section-copy">
+            The products most often used together, all in one place.
+          </p>
+        </div>
+        <RoutineCarousel products={routineProducts} />
       </section>
 
       <section className="shell page-section">
@@ -90,7 +82,6 @@ export function HomePage() {
             <Link key={collection.handle} href={`/collections/${collection.handle}`} className="collection-card">
               {collection.image ? <img src={collection.image} alt={collection.title} className="collection-card__image" /> : null}
               <div className="collection-card__body">
-                <p className="eyebrow">Collection</p>
                 <h3>{collection.title}</h3>
                 <p>{collection.description || "Browse the products in this category."}</p>
               </div>
@@ -99,13 +90,7 @@ export function HomePage() {
         </div>
       </section>
 
-      <HomeCollectionShowcase tabs={collectionTabs} />
-
-      <section className="shell page-section">
-        <TestimonialCarousel items={homeContent.testimonials} />
-      </section>
-
-      <section className="shell page-section">
+      <section className="shell page-section page-section--bestsellers-top">
         <div className="page-heading">
           <div>
             <p className="eyebrow">Bestsellers</p>
@@ -115,28 +100,19 @@ export function HomePage() {
             View all bestsellers
           </Link>
         </div>
-        <div className="product-grid">
-          {bestsellers.map((product) => (
-            <ProductCard key={product.handle} product={product} />
-          ))}
-        </div>
+        <BestsellersCarousel products={bestsellers} />
       </section>
 
+      <EveryBodyBanner content={homeContent.everyBodyBanner} />
+
+      <HomeCollectionShowcase tabs={collectionTabs} />
+
+      <StandardsFeature content={homeContent.hero} />
+
+      <NewsletterSignup content={homeContent.newsletter} />
+
       <section className="shell page-section">
-        <div className="page-heading">
-          <div>
-            <p className="eyebrow">Excellence. Made effortless.</p>
-            <h2>The routine, at a glance.</h2>
-          </div>
-          <p className="section-copy">
-            The products most often used together, all in one place.
-          </p>
-        </div>
-        <div className="product-grid">
-          {routineProducts.map((product) => (
-            <ProductCard key={product.handle} product={product} />
-          ))}
-        </div>
+        <TestimonialCarousel items={homeContent.testimonials} />
       </section>
     </>
   );
