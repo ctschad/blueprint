@@ -1,15 +1,133 @@
+const headerMegaMenuQuickLinks = [
+  { label: "Shop All", href: "/collections/all-products" },
+  { label: "Bestsellers", href: "/collections/bestsellers" },
+  { label: "Build my Stack", href: "/pages/build-my-stack" }
+] as const;
+
+const headerMegaMenuFeatureCards = [
+  {
+    title: "Start Quiz",
+    href: "/pages/protocol-quiz",
+    image: "/media/menu/quiz-promo.webp",
+    alt: "Take the protocol quiz"
+  },
+  {
+    title: "Subscribe & Save 5%",
+    href: "/collections/all-products",
+    image: "/media/menu/subscribe-save-promo.png",
+    alt: "Subscribe and save promotion"
+  }
+] as const;
+
+export const shopByCategoryMenu = {
+  quickLinks: headerMegaMenuQuickLinks,
+  groups: [
+    {
+      title: "Nutrition",
+      href: "/collections/nutrition",
+      items: [
+        { label: "Olive Oil", href: "/products/extra-virgin-olive-oil" },
+        { label: "Metabolic Protein", href: "/products/metabolic-protein-powder" },
+        { label: "Longevity Protein", href: "/products/longevity-protein-chocolate" },
+        { label: "Macadamia Protein Bars", href: "/products/macadamia-protein-bar" },
+        { label: "Blueberry Nut Mix", href: "/products/nutty-pudding-fruit-and-nut-mix" },
+        { label: "Super Shrooms", href: "/products/super-shrooms" },
+        { label: "Raw Macadamias", href: "/products/raw-macadamias" },
+        { label: "Ceremonial Grade Matcha", href: "/products/ceremonial-matcha" },
+        { label: "Cocoa Powder", href: "/products/cocoa-powder" }
+      ]
+    },
+    {
+      title: "Supplements",
+      href: "/collections/supplements",
+      items: [
+        {
+          label: "Longevity Mix",
+          href: "/products/longevity-blend-multinutrient-drink-mix-blood-orange-flavor"
+        },
+        { label: "Creatine", href: "/products/creatine" },
+        { label: "Ashwagandha + Rhodiola", href: "/products/ashwagandha-rhodiola-120mg" },
+        { label: "NAC + Ginger + Curcumin", href: "/products/nac-ginger-capsules" },
+        { label: "Essential Capsules", href: "/products/essentials-capsules" },
+        { label: "Advanced Antioxidants", href: "/products/advanced-antioxidants" },
+        { label: "Collagen Peptides", href: "/products/collagen" },
+        { label: "Omega-3", href: "/products/omega-3" }
+      ]
+    },
+    {
+      title: "Skincare",
+      href: "/collections/skincare",
+      items: [
+        { label: "Gentle Cleanser", href: "/products/facial-cleanser" },
+        { label: "Facial Moisturizer", href: "/products/facial-moisturizer" },
+        { label: "Facial Serum", href: "/products/facial-serum" }
+      ]
+    },
+    {
+      title: "Haircare",
+      href: "/collections/haircare",
+      items: [
+        { label: "302 Laser Cap", href: "/products/laser-cap" },
+        { label: "Peptide Serum", href: "/products/hair-peptide-serum" },
+        { label: "Peptide Shampoo", href: "/products/hair-peptide-shampoo" }
+      ]
+    }
+  ],
+  utilityLinks: [
+    { label: "Curated Bundles", href: "/collections/stacks" },
+    { label: "Blueprint Merch", href: "/collections/merch" },
+    { label: "Meal Delivery", href: "https://meals.bryanjohnson.com/get-started", external: true },
+    { label: "Biomarkers", href: "/pages/biomarkers" }
+  ],
+  featureCards: headerMegaMenuFeatureCards
+} as const;
+
+export const shopByBenefitMenu = {
+  quickLinks: headerMegaMenuQuickLinks,
+  title: "Shop by Benefit",
+  items: [
+    { label: "Daily Health & Longevity", href: "/collections/daily-health-longevity" },
+    { label: "Brain & Heart Health", href: "/collections/brain-heart-health" },
+    { label: "Energy & Stress Support", href: "/collections/energy-stress-support" },
+    { label: "Muscle Performance & Recovery", href: "/collections/muscle-performance-recovery" },
+    { label: "Nutritional Support", href: "/collections/nutritional-support" },
+    { label: "Gut & Immune Health Support", href: "/collections/gut-immune-support" },
+    { label: "Hair & Skincare", href: "/collections/hair-and-skin-care" }
+  ],
+  featureCards: headerMegaMenuFeatureCards
+} as const;
+
 export const homeContent = {
   hero: {
-    eyebrow: "Engineered by longevity experts and doctors",
-    title: "The world's most tested longevity products.",
+    heading: "The world's most tested longevity products.",
+    title: "Our standards",
     description:
-      "Blueprint pairs clinically backed ingredients with rigorous contaminant screening and radical transparency, so building a daily routine feels simple, measurable, and trustworthy."
+      "90% of supplements are mislabeled and full of hidden toxins. We test every ingredient, publish every result, and keep transparency a non-negotiable.",
+    resultsLabel: "View Our Test Results",
+    resultsHref: "/pages/coas",
+    footnote: "*COAs are property of Blueprint and are not to be used without Blueprint's consent.",
+    image: {
+      src: "/media/home/our-standards-petri-dishes.jpg",
+      alt: "Four glass bowls containing different powders and liquids on a light stone surface"
+    },
+    secondaryCard: {
+      title: "What you will not find inside.",
+      items: [
+        {
+          title: "No Label Fluff",
+          description: "Marketing claims that sound impressive but do not hold up under scrutiny."
+        },
+        {
+          title: "No Pixie Dusting",
+          description: "Ingredients added at doses too small to matter, just to decorate the label."
+        },
+        {
+          title: "No Shortcuts",
+          description: "We test for heavy metals, toxins, and contaminants that other brands often ignore."
+        }
+      ]
+    }
   },
-  stats: [
-    { value: "47", label: "products" },
-    { value: "59", label: "journal stories" },
-    { value: "49", label: "guides and pages" }
-  ],
   collectionTabs: [
     { handle: "daily-health-longevity", label: "Daily Health & Longevity" },
     { handle: "brain-heart-health", label: "Brain & Heart Health" },
@@ -25,22 +143,6 @@ export const homeContent = {
     "energy-stress-support",
     "muscle-performance-recovery",
     "gut-immune-support"
-  ],
-  flowCards: [
-    {
-      title: "No Label Fluff",
-      description: "Marketing claims on products that are suspicious and misleading."
-    },
-    {
-      title: "No Pixie Dusting",
-      description:
-        "A marketing trick where brands add ingredients at doses too small to matter. The label looks good, but the benefit is questionable."
-    },
-    {
-      title: "No Shortcuts",
-      description:
-        "Most brands skip testing. We test for heavy metals, toxins, and other contaminants that should not be there."
-    }
   ],
   testimonials: [
     {

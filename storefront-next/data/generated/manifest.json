@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-04-07T05:48:03.692998+00:00",
+  "generatedAt": "2026-04-07T18:06:56.208247+00:00",
   "siteName": "Blueprint Bryan Johnson",
-  "siteDescription": "Science-backed longevity products, protocols, and journal content from Blueprint.",
+  "siteDescription": "A Next.js rewrite powered by mirrored storefront data.",
   "counts": {
     "products": 47,
     "collections": 93,

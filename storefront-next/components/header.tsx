@@ -1,16 +1,15 @@
 "use client";
 
+import { HeaderBenefitMenu } from "@/components/header-benefit-menu";
+import { HeroCategoryMenu } from "@/components/hero-category-menu";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { useAccount, useCart } from "@/components/storefront-provider";
 
 const NAV_LINKS = [
-  { href: "/collections/all-products", label: "Shop All" },
-  { href: "/collections/bestsellers", label: "Bestsellers" },
-  { href: "/collections/daily-health-longevity", label: "Daily Health" },
-  { href: "/collections/brain-heart-health", label: "Brain & Heart" },
-  { href: "/blogs/news", label: "Journal" }
+  { href: "/pages/build-my-stack", label: "Build my Stack", match: "/pages/build-my-stack" },
+  { href: "/blogs/news", label: "Learn", match: "/blogs" }
 ];
 
 export function Header() {
@@ -39,16 +38,21 @@ export function Header() {
         </div>
 
         <nav className={`site-header__nav ${menuOpen ? "is-open" : ""}`}>
+          <HeroCategoryMenu variant="header" />
+          <HeaderBenefitMenu />
           {NAV_LINKS.map((link) => (
             <Link
               key={link.href}
               href={link.href}
-              className={pathname.startsWith(link.href) ? "is-active" : ""}
+              className={pathname.startsWith(link.match) ? "is-active" : ""}
               onClick={() => setMenuOpen(false)}
             >
               {link.label}
             </Link>
           ))}
+          <Link href="/pages/protocol-quiz" className="site-header__quiz-link" onClick={() => setMenuOpen(false)}>
+            Take the Quiz
+          </Link>
         </nav>
 
         <div className="site-header__actions">

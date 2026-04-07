@@ -33,28 +33,44 @@ export function HomePage() {
   return (
     <>
       <section className="hero">
-        <div className="shell hero__grid">
-          <div className="hero__copy">
-            <p className="eyebrow">{homeContent.hero.eyebrow}</p>
-            <h1>{homeContent.hero.title}</h1>
-            <p>{homeContent.hero.description}</p>
-            <div className="hero__actions">
-              <Link href="/collections/all-products" className="button button--solid">
-                Shop all products
-              </Link>
-              <Link href="/search" className="button button--ghost">
-                Search the catalog
-              </Link>
-            </div>
-          </div>
+        <div className="shell">
+          <div className="hero__stage">
+            <h1 className="sr-only">{homeContent.hero.heading}</h1>
 
-          <div className="hero__stats">
-            {homeContent.stats.map((stat) => (
-              <div key={stat.label} className="stat-card">
-                <strong>{stat.value}</strong>
-                <span>{stat.label}</span>
+            <div className="hero__media">
+              <img
+                src={homeContent.hero.image.src}
+                alt={homeContent.hero.image.alt}
+                className="hero__media-image"
+              />
+            </div>
+
+            <div className="hero__cards">
+              <div className="hero__card">
+                <div className="hero__card-body">
+                  <h2 className="hero__card-title">{homeContent.hero.title}</h2>
+                  <p className="hero__card-copy">{homeContent.hero.description}</p>
+                  <Link href={homeContent.hero.resultsHref} className="hero__results-link">
+                    {homeContent.hero.resultsLabel}
+                  </Link>
+                  <p className="hero__footnote">{homeContent.hero.footnote}</p>
+                </div>
               </div>
-            ))}
+
+              <aside className="hero__ingredient-card" aria-label={homeContent.hero.secondaryCard.title}>
+                <div className="hero__ingredient-card-body">
+                  <h2 className="hero__ingredient-card-title">{homeContent.hero.secondaryCard.title}</h2>
+                  <div className="hero__ingredient-list">
+                    {homeContent.hero.secondaryCard.items.map((item) => (
+                      <div key={item.title} className="hero__ingredient-item">
+                        <h3>{item.title}</h3>
+                        <p>{item.description}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </aside>
+            </div>
           </div>
         </div>
       </section>
@@ -84,27 +100,6 @@ export function HomePage() {
       </section>
 
       <HomeCollectionShowcase tabs={collectionTabs} />
-
-      <section className="shell page-section page-section--split">
-        <div className="surface-card surface-card--image">
-          <img
-            src="https://blueprint.bryanjohnson.com/cdn/shop/files/advanced-antioxidants__pill-transparent--square_4482dc24-e003-4fb9-bc74-9445b663c7ad.png?v=1770224966"
-            alt="Advanced Antioxidants visual"
-          />
-        </div>
-        <div className="surface-card">
-          <p className="eyebrow">Our Standard</p>
-          <h2>What you will not find inside.</h2>
-          <div className="flow-grid">
-            {homeContent.flowCards.map((card) => (
-              <div key={card.title} className="flow-card">
-                <h3>{card.title}</h3>
-                <p>{card.description}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
 
       <section className="shell page-section">
         <TestimonialCarousel items={homeContent.testimonials} />

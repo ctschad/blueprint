@@ -5,6 +5,7 @@ from __future__ import annotations
 import html
 import json
 import re
+import shutil
 from collections import defaultdict
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -17,6 +18,7 @@ from urllib.parse import urljoin, urlparse
 ROOT = Path(__file__).resolve().parents[1]
 MIRROR_DIR = ROOT / "mirror" / "blueprint.bryanjohnson.com"
 OUTPUT_DIR = ROOT / "storefront-next" / "data" / "generated"
+PUBLIC_DIR = ROOT / "storefront-next" / "public"
 SITE_URL = "https://blueprint.bryanjohnson.com"
 APP_ROUTE_PREFIXES = (
     "/",
@@ -318,10 +320,36 @@ def resolve_url(url: str | None, source_relative: str) -> str | None:
     return resolved
 
 
+def mirror_asset_to_public_url(resolved_url: str) -> str | None:
+    parsed = urlparse(resolved_url)
+    if parsed.scheme not in {"", "http", "https"}:
+        return None
+    if parsed.netloc and parsed.netloc != urlparse(SITE_URL).netloc:
+        return None
+
+    relative_path = parsed.path.lstrip("/")
+    if not relative_path or relative_path.startswith(("_next/", "api/")):
+        return None
+
+    source_path = MIRROR_DIR / relative_path
+    if not source_path.is_file():
+        return None
+
+    target_path = PUBLIC_DIR / relative_path
+    target_path.parent.mkdir(parents=True, exist_ok=True)
+    if not target_path.exists() or source_path.stat().st_size != target_path.stat().st_size:
+        shutil.copy2(source_path, target_path)
+
+    return parsed.path
+
+
 def normalize_fragment_asset(url: str | None, source_relative: str) -> str | None:
     resolved = resolve_url(url, source_relative)
     if not resolved:
         return None
+    local_asset = mirror_asset_to_public_url(resolved)
+    if local_asset:
+        return local_asset
     return normalize_asset_url(resolved) or resolved
 
 
@@ -375,6 +403,19 @@ def rewrite_html_fragment(fragment: str, source_relative: str) -> str:
     cleaned = re.sub(
         r'(?P<attr>\b(?:href|src|srcset|poster|action)\b)\s*=\s*(?P<quote>["\'])(?P<value>.*?)(?P=quote)',
         replace_attribute,
+        cleaned,
+        flags=re.S | re.I,
+    )
+
+    def replace_css_url(match: re.Match[str]) -> str:
+        quote = match.group("quote") or ""
+        value = match.group("value")
+        updated = normalize_fragment_asset(value, source_relative) or value
+        return f"url({quote}{html.escape(updated, quote=True)}{quote})"
+
+    cleaned = re.sub(
+        r'url\((?P<quote>["\']?)(?P<value>.*?)(?P=quote)\)',
+        replace_css_url,
         cleaned,
         flags=re.S | re.I,
     )
