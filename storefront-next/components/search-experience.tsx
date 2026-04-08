@@ -1,7 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { startTransition, useDeferredValue, useEffect, useRef, useState, type FocusEvent, type FormEvent } from "react";
+import {
+  startTransition,
+  useDeferredValue,
+  useEffect,
+  useRef,
+  useState,
+  type FocusEvent,
+  type FormEvent,
+  type MouseEvent
+} from "react";
 import { usePathname, useRouter } from "next/navigation";
 
 type SearchProduct = {
@@ -221,6 +230,10 @@ export function SearchExperience({
     setIsFocused(false);
   };
 
+  const handleSuggestionMouseDown = (event: MouseEvent<HTMLElement>) => {
+    event.preventDefault();
+  };
+
   return (
     <section className={`shell page-section search-page ${trimmedQuery ? "is-results" : "is-empty"}`}>
       <div className="search-page__hero">
@@ -260,7 +273,13 @@ export function SearchExperience({
                   <p className="search-suggestions__label">Products</p>
                   {suggestionProducts.length ? (
                     suggestionProducts.map((product) => (
-                      <Link key={product.handle} href={`/products/${product.handle}`} className="search-suggestion-item">
+                      <Link
+                        key={product.handle}
+                        href={`/products/${product.handle}`}
+                        className="search-suggestion-item"
+                        onMouseDown={handleSuggestionMouseDown}
+                        onClick={() => setIsFocused(false)}
+                      >
                         {product.image ? (
                           <img src={product.image} alt={product.title} className="search-suggestion-item__image" />
                         ) : (
@@ -282,7 +301,13 @@ export function SearchExperience({
                   <p className="search-suggestions__label">Articles</p>
                   {suggestionArticles.length ? (
                     suggestionArticles.map((article) => (
-                      <Link key={article.href} href={article.href} className="search-suggestion-item search-suggestion-item--article">
+                      <Link
+                        key={article.href}
+                        href={article.href}
+                        className="search-suggestion-item search-suggestion-item--article"
+                        onMouseDown={handleSuggestionMouseDown}
+                        onClick={() => setIsFocused(false)}
+                      >
                         {article.image ? (
                           <img src={article.image} alt={article.title} className="search-suggestion-item__image" />
                         ) : (
@@ -302,6 +327,7 @@ export function SearchExperience({
               <button
                 type="button"
                 className="search-suggestions__view-all"
+                onMouseDown={handleSuggestionMouseDown}
                 onClick={() => {
                   commitSearch(query);
                   setIsFocused(false);

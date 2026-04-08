@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import type { FocusEvent, ReactNode } from "react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { shopByCategoryMenu } from "@/lib/home-content";
 
 type MenuLink = {
@@ -46,9 +46,32 @@ export function HeroCategoryMenu({
   variant?: "hero" | "header";
 }) {
   const [open, setOpen] = useState(false);
+  const closeTimeoutRef = useRef<number | null>(null);
+
+  const clearCloseTimeout = () => {
+    if (closeTimeoutRef.current !== null) {
+      window.clearTimeout(closeTimeoutRef.current);
+      closeTimeoutRef.current = null;
+    }
+  };
+
+  const closeSoon = () => {
+    clearCloseTimeout();
+    closeTimeoutRef.current = window.setTimeout(() => {
+      setOpen(false);
+      closeTimeoutRef.current = null;
+    }, 220);
+  };
+
+  useEffect(() => {
+    return () => {
+      clearCloseTimeout();
+    };
+  }, []);
 
   const handleBlur = (event: FocusEvent<HTMLDivElement>) => {
     if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
+      clearCloseTimeout();
       setOpen(false);
     }
   };
@@ -56,12 +79,19 @@ export function HeroCategoryMenu({
   return (
     <div
       className={`hero-category-menu hero-category-menu--${variant} ${open ? "is-open" : ""}`}
-      onMouseEnter={() => setOpen(true)}
-      onMouseLeave={() => setOpen(false)}
-      onFocusCapture={() => setOpen(true)}
+      onMouseEnter={() => {
+        clearCloseTimeout();
+        setOpen(true);
+      }}
+      onMouseLeave={closeSoon}
+      onFocusCapture={() => {
+        clearCloseTimeout();
+        setOpen(true);
+      }}
       onBlur={handleBlur}
       onKeyDown={(event) => {
         if (event.key === "Escape") {
+          clearCloseTimeout();
           setOpen(false);
           (event.currentTarget.querySelector("button") as HTMLButtonElement | null)?.focus();
         }
@@ -74,7 +104,10 @@ export function HeroCategoryMenu({
         }`}
         aria-expanded={open}
         aria-haspopup="menu"
-        onClick={() => setOpen((current) => !current)}
+        onClick={() => {
+          clearCloseTimeout();
+          setOpen((current) => !current);
+        }}
       >
         Shop by Category
         <span className="hero-category-menu__chevron" aria-hidden="true">

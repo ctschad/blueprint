@@ -97,6 +97,31 @@ export type StaticPage = {
   legacyPath: string;
 };
 
+export type CoaCategory = "all" | "nutrition" | "supplements" | "skincare" | "haircare";
+
+export type CoaEntry = {
+  title: string;
+  href: string;
+  image: string;
+  reportHref: string;
+  priceLabel: string;
+  category: Exclude<CoaCategory, "all">;
+};
+
+export type CoaFaq = {
+  question: string;
+  answerHtml: string;
+};
+
+export type CoaPageData = {
+  heroTitle: string;
+  heroDescription: string;
+  heroDesktopImage: string;
+  heroMobileImage: string;
+  entries: CoaEntry[];
+  faqs: CoaFaq[];
+};
+
 export type Manifest = {
   generatedAt: string;
   siteName: string;

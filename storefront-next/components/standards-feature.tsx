@@ -32,7 +32,7 @@ type StandardsFeatureProps = {
 };
 
 export function StandardsFeature({ content }: StandardsFeatureProps) {
-  const [activeIndex, setActiveIndex] = useState(0);
+  const [activeIndex, setActiveIndex] = useState<number | null>(null);
 
   return (
     <section className="standards-feature shell page-section">
@@ -49,7 +49,9 @@ export function StandardsFeature({ content }: StandardsFeatureProps) {
                 className="standards-feature__item"
                 type="button"
                 aria-expanded={activeIndex === index}
-                onClick={() => setActiveIndex(index)}
+                onClick={() =>
+                  setActiveIndex((current) => (current === index ? null : index))
+                }
               >
                 <span className="standards-feature__summary">
                   <span className="standards-feature__item-title">{item.title}</span>

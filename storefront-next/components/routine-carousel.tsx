@@ -146,10 +146,12 @@ export function RoutineCarousel({ products }: { products: Product[] }) {
   }
 
   function handleWheel(event: WheelEvent<HTMLDivElement>) {
-    const horizontalDelta =
-      Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY;
+    const horizontalDelta = event.deltaX;
+    const absX = Math.abs(horizontalDelta);
+    const absY = Math.abs(event.deltaY);
 
-    if (!horizontalDelta) {
+    // Let normal page scrolling pass through unless the gesture is clearly horizontal.
+    if (absX < 3 || absX <= absY * 1.15) {
       return;
     }
 
@@ -157,8 +159,14 @@ export function RoutineCarousel({ products }: { products: Product[] }) {
       return;
     }
 
+    const nextOffset = Math.max(0, Math.min(offsetRef.current + horizontalDelta, maxOffsetRef.current));
+
+    if (nextOffset === offsetRef.current) {
+      return;
+    }
+
     event.preventDefault();
-    offsetRef.current = Math.max(0, Math.min(offsetRef.current + horizontalDelta, maxOffsetRef.current));
+    offsetRef.current = nextOffset;
     railRef.current.style.transform = `translate3d(${-offsetRef.current}px, 0, 0)`;
   }
 
