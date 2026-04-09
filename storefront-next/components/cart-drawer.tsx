@@ -3,11 +3,11 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useCart } from "@/components/storefront-provider";
-import { formatMoney } from "@/lib/storefront";
+import { formatMoney } from "@/lib/money";
 
 const FREE_SHIPPING_THRESHOLD = 5000;
 
-const FREQUENTLY_BOUGHT_TOGETHER = [
+const UPSELL_POOL = [
   {
     handle: "longevity-blend-multinutrient-drink-mix-blood-orange-flavor",
     title: "Longevity Mix - Blood Orange",
@@ -30,6 +30,62 @@ const FREQUENTLY_BOUGHT_TOGETHER = [
     price: 4900,
     image: "https://blueprint.bryanjohnson.com/cdn/shop/files/Blueprint_Advanced_Antioxidants_Supplement_Bottle_Delayed_Release_Capsules.webp?v=1769456712",
     variantId: 47190784639261,
+    variantTitle: "Default Title"
+  },
+  {
+    handle: "extra-virgin-olive-oil",
+    title: "Extra Virgin Olive Oil",
+    price: 3900,
+    image: "https://blueprint.bryanjohnson.com/cdn/shop/files/Blueprint_Snake_Oil_Extra_Virgin_Olive_Oil_Bottle_Longevity_EVOO.webp?v=1769456712",
+    variantId: 47471239790877,
+    variantTitle: "1 Bottle"
+  },
+  {
+    handle: "omega-3",
+    title: "Omega-3",
+    price: 3900,
+    image: "https://blueprint.bryanjohnson.com/cdn/shop/files/Blueprint_Omega_3_supplement_bottle_1.webp?v=1769456711",
+    variantId: 50548443185437,
+    variantTitle: "Default Title"
+  },
+  {
+    handle: "creatine",
+    title: "Creatine",
+    price: 4000,
+    image: "https://blueprint.bryanjohnson.com/cdn/shop/files/Blueprint_Creatine_supplement_pouch.webp?v=1769456712",
+    variantId: 49472442630429,
+    variantTitle: "Default Title"
+  },
+  {
+    handle: "collagen",
+    title: "Collagen Peptides",
+    price: 4500,
+    image: "https://blueprint.bryanjohnson.com/cdn/shop/files/Blueprint_Collagen_supplement_pouch.webp?v=1769456768",
+    variantId: 49472446628125,
+    variantTitle: "Default Title"
+  },
+  {
+    handle: "ceremonial-matcha",
+    title: "Ceremonial Grade Matcha",
+    price: 3500,
+    image: "https://blueprint.bryanjohnson.com/cdn/shop/files/Blueprint_Matcha_Powder_Ceremonial_Grade_Green_Tea_Pouch.webp?v=1769456899",
+    variantId: 49411367076125,
+    variantTitle: "Default Title"
+  },
+  {
+    handle: "raw-macadamias",
+    title: "Raw Macadamias",
+    price: 3500,
+    image: "https://blueprint.bryanjohnson.com/cdn/shop/files/Blueprint_Raw_Macadamias_Unsalted_Single_Ingredient_Superfood_Pouch.webp?v=1769456903",
+    variantId: 49182996300061,
+    variantTitle: "Default Title"
+  },
+  {
+    handle: "super-shrooms",
+    title: "Super Shrooms",
+    price: 3500,
+    image: "https://blueprint.bryanjohnson.com/cdn/shop/files/Blueprint_Super_Shrooms_Functional_Mushroom_Blend_Pouch.webp?v=1769456649",
+    variantId: 49480034091293,
     variantTitle: "Default Title"
   }
 ] as const;
@@ -89,6 +145,9 @@ function TrustIcon({ type }: { type: (typeof TRUST_MARKERS)[number]["icon"] }) {
 export function CartDrawer() {
   const { lines, isOpen, closeCart, removeLine, updateQuantity, subtotal, addItem } = useCart();
   const [subscriptionUpsells, setSubscriptionUpsells] = useState<Record<string, boolean>>({});
+  const cartHandles = new Set(lines.map((line) => line.productHandle));
+  const visibleUpsells = UPSELL_POOL.filter((item) => !cartHandles.has(item.handle)).slice(0, 3);
+  const visibleUpsellHandlesKey = visibleUpsells.map((item) => item.handle).join("|");
 
   const remainingForFreeShipping = Math.max(0, FREE_SHIPPING_THRESHOLD - subtotal);
   const shippingProgress = Math.min(100, Math.round((subtotal / FREE_SHIPPING_THRESHOLD) * 100));
@@ -99,6 +158,25 @@ export function CartDrawer() {
     }
   }, [isOpen]);
 
+  useEffect(() => {
+    const visibleHandles = new Set<string>(visibleUpsells.map((item) => item.handle));
+
+    setSubscriptionUpsells((current) => {
+      const nextEntries = Object.entries(current).filter(
+        ([handle, checked]) => checked && visibleHandles.has(handle)
+      );
+
+      if (
+        nextEntries.length === Object.keys(current).length &&
+        nextEntries.every(([handle, checked]) => current[handle] === checked)
+      ) {
+        return current;
+      }
+
+      return Object.fromEntries(nextEntries);
+    });
+  }, [visibleUpsellHandlesKey]);
+
   function toggleUpsell(handle: string) {
     setSubscriptionUpsells((current) => ({
       ...current,
@@ -106,7 +184,7 @@ export function CartDrawer() {
     }));
   }
 
-  function addUpsell(item: (typeof FREQUENTLY_BOUGHT_TOGETHER)[number]) {
+  function addUpsell(item: (typeof UPSELL_POOL)[number]) {
     const isSubscription = Boolean(subscriptionUpsells[item.handle]);
     const price = isSubscription ? Math.round(item.price * 0.95) : item.price;
     const baseVariantTitle = isDefaultVariant(item.variantTitle) ? item.title : item.variantTitle;
@@ -159,11 +237,17 @@ export function CartDrawer() {
               <div className="cart-drawer__lines">
                 {lines.map((line) => (
                   <article key={line.id} className="cart-line">
-                    {line.image ? <img src={line.image} alt={line.productTitle} className="cart-line__image" /> : null}
+                    <Link href={`/products/${line.productHandle}`} onClick={closeCart} className="cart-line__image-link">
+                      {line.image ? <img src={line.image} alt={line.productTitle} className="cart-line__image" /> : null}
+                    </Link>
                     <div className="cart-line__content">
                       <div>
-                        <p className="cart-line__title">{line.productTitle}</p>
-                        {!isDefaultVariant(line.variantTitle) ? (
+                        <p className="cart-line__title">
+                          <Link href={`/products/${line.productHandle}`} onClick={closeCart} className="cart-line__title-link">
+                            {line.productTitle}
+                          </Link>
+                        </p>
+                        {line.variantTitle ? (
                           <p className="cart-line__variant">{line.variantTitle}</p>
                         ) : null}
                       </div>
@@ -190,7 +274,7 @@ export function CartDrawer() {
           <section className="cart-drawer__upsell">
             <h3>Frequently bought together</h3>
             <div className="cart-drawer__upsell-list">
-              {FREQUENTLY_BOUGHT_TOGETHER.map((item) => (
+              {visibleUpsells.map((item) => (
                 <article key={item.handle} className="cart-drawer__upsell-item">
                   <Link href={`/products/${item.handle}`} onClick={closeCart} className="cart-drawer__upsell-image-wrap">
                     <img src={item.image} alt={item.title} className="cart-drawer__upsell-image" />
@@ -222,6 +306,11 @@ export function CartDrawer() {
                   </div>
                 </article>
               ))}
+              {visibleUpsells.length === 0 ? (
+                <p className="cart-drawer__upsell-empty">
+                  You already have all of our favorite pairings in your cart.
+                </p>
+              ) : null}
             </div>
           </section>
 

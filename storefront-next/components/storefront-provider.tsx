@@ -19,6 +19,7 @@ type CartContextValue = {
   addItem: (line: Omit<CartLine, "id" | "quantity">, quantity?: number) => void;
   updateQuantity: (lineId: string, quantity: number) => void;
   removeLine: (lineId: string) => void;
+  toggleSubscription: (lineId: string) => void;
   clearCart: () => void;
 };
 
@@ -30,6 +31,37 @@ type AccountContextValue = {
 
 const CART_STORAGE_KEY = "blueprint-next-cart";
 const ACCOUNT_STORAGE_KEY = "blueprint-next-account";
+
+const DEFAULT_PACK_LABELS: Record<string, string> = {
+  "advanced-antioxidants": "1 Bottle",
+  "ashwagandha-rhodiola-120mg": "1 Bottle",
+  "nac-ginger-capsules": "1 Bottle",
+  "omega-3": "1 Bottle",
+  "essentials-capsules": "1 Bottle",
+  "creatine": "1 Pouch",
+  "collagen": "1 Pouch",
+  "ceremonial-matcha": "1 Pouch",
+  "cocoa-powder": "1 Pouch",
+  "nutty-pudding-fruit-and-nut-mix": "1 Pouch",
+  "raw-macadamias": "1 Pouch",
+  "super-shrooms": "1 Pouch",
+  "facial-cleanser": "1 Bottle",
+  "facial-moisturizer": "1 Bottle",
+  "facial-serum": "1 Bottle",
+  "hair-peptide-serum": "1 Bottle",
+  "hair-peptide-shampoo": "1 Bottle",
+  "blueprint-hat": "1 Hat",
+  "spout": "1 Spout",
+  "laser-cap": "1 Device",
+  "advanced-panel": "1 Kit",
+  "basic-panel": "1 Kit",
+  "microplastics-test": "1 Test",
+  "speed-of-aging": "1 Test",
+  "haircare-stack": "1 Set",
+  "skincare-stack": "1 Set"
+};
+
+const SUBSCRIPTION_INELIGIBLE_HANDLES = new Set(["laser-cap"]);
 
 const CartContext = createContext<CartContextValue | undefined>(undefined);
 const AccountContext = createContext<AccountContextValue | undefined>(undefined);
@@ -45,10 +77,62 @@ function readStoredCart() {
   }
 
   try {
-    return JSON.parse(raw) as CartLine[];
+    return (JSON.parse(raw) as CartLine[]).map(normalizeCartLine);
   } catch {
     return [];
   }
+}
+
+function isSubscriptionTitle(variantTitle: string) {
+  return variantTitle === "Subscription" || /\s· Subscription$/.test(variantTitle);
+}
+
+function getBaseVariantTitle(variantTitle: string) {
+  if (!variantTitle || variantTitle === "Subscription") {
+    return "";
+  }
+
+  return variantTitle.replace(/\s· Subscription$/, "").trim();
+}
+
+function hasMeaningfulVariantTitle(variantTitle: string, productTitle: string) {
+  return Boolean(variantTitle && variantTitle !== "Default Title" && variantTitle !== productTitle);
+}
+
+function getFallbackVariantTitle(productHandle: string) {
+  return DEFAULT_PACK_LABELS[productHandle] ?? "";
+}
+
+function isSubscriptionEligible(productHandle: string) {
+  return !SUBSCRIPTION_INELIGIBLE_HANDLES.has(productHandle);
+}
+
+function getDisplayVariantTitle(baseVariantTitle: string, isSubscription: boolean) {
+  if (!baseVariantTitle) {
+    return isSubscription ? "Subscription" : "";
+  }
+
+  return isSubscription ? `${baseVariantTitle} · Subscription` : baseVariantTitle;
+}
+
+function normalizeCartLine(line: CartLine): CartLine {
+  const rawBaseVariantTitle = line.baseVariantTitle ?? getBaseVariantTitle(line.variantTitle);
+  const baseVariantTitle = hasMeaningfulVariantTitle(rawBaseVariantTitle, line.productTitle)
+    ? rawBaseVariantTitle
+    : getFallbackVariantTitle(line.productHandle);
+  const isSubscription = isSubscriptionEligible(line.productHandle)
+    ? line.isSubscription ?? isSubscriptionTitle(line.variantTitle)
+    : false;
+  const basePrice = line.basePrice ?? (isSubscription ? Math.round(line.price / 0.95) : line.price);
+
+  return {
+    ...line,
+    baseVariantTitle,
+    basePrice,
+    isSubscription,
+    variantTitle: getDisplayVariantTitle(baseVariantTitle, isSubscription),
+    price: isSubscription ? Math.round(basePrice * 0.95) : basePrice
+  };
 }
 
 function readStoredAccount(): AccountProfile {
@@ -103,15 +187,39 @@ export function StorefrontProvider({ children }: { children: ReactNode }) {
     addItem: (line, quantity = 1) => {
       const safeQuantity = Math.max(1, quantity);
       const id = `${line.productHandle}:${line.variantId}`;
+      const normalizedLine = normalizeCartLine({
+        ...line,
+        id,
+        quantity: safeQuantity
+      });
 
       setLines((current) => {
         const existing = current.find((item) => item.id === id);
         if (!existing) {
-          return [...current, { ...line, id, quantity: safeQuantity }];
+          return [...current, normalizedLine];
         }
 
+        const mergedIsSubscription = isSubscriptionEligible(existing.productHandle)
+          ? Boolean(existing.isSubscription || normalizedLine.isSubscription)
+          : false;
+        const basePrice = existing.basePrice ?? normalizedLine.basePrice ?? existing.price;
+        const existingBaseVariantTitle = existing.baseVariantTitle ?? getBaseVariantTitle(existing.variantTitle);
+        const baseVariantTitle = hasMeaningfulVariantTitle(existingBaseVariantTitle, existing.productTitle)
+          ? existingBaseVariantTitle
+          : normalizedLine.baseVariantTitle ?? getFallbackVariantTitle(existing.productHandle);
+
         return current.map((item) =>
-          item.id === id ? { ...item, quantity: item.quantity + safeQuantity } : item
+          item.id === id
+            ? {
+                ...item,
+                quantity: item.quantity + safeQuantity,
+                basePrice,
+                baseVariantTitle,
+                isSubscription: mergedIsSubscription,
+                price: mergedIsSubscription ? Math.round(basePrice * 0.95) : basePrice,
+                variantTitle: getDisplayVariantTitle(baseVariantTitle, mergedIsSubscription)
+              }
+            : item
         );
       });
 
@@ -126,6 +234,35 @@ export function StorefrontProvider({ children }: { children: ReactNode }) {
     },
     removeLine: (lineId) => {
       setLines((current) => current.filter((line) => line.id !== lineId));
+    },
+    toggleSubscription: (lineId) => {
+      setLines((current) =>
+        current.map((line) => {
+          if (line.id !== lineId) {
+            return line;
+          }
+
+          if (!isSubscriptionEligible(line.productHandle)) {
+            return line;
+          }
+
+          const basePrice = line.basePrice ?? line.price;
+          const rawBaseVariantTitle = line.baseVariantTitle ?? getBaseVariantTitle(line.variantTitle);
+          const baseVariantTitle = hasMeaningfulVariantTitle(rawBaseVariantTitle, line.productTitle)
+            ? rawBaseVariantTitle
+            : getFallbackVariantTitle(line.productHandle);
+          const isSubscription = !line.isSubscription;
+
+          return {
+            ...line,
+            basePrice,
+            baseVariantTitle,
+            isSubscription,
+            price: isSubscription ? Math.round(basePrice * 0.95) : basePrice,
+            variantTitle: getDisplayVariantTitle(baseVariantTitle, isSubscription)
+          };
+        })
+      );
     },
     clearCart: () => setLines([])
   };

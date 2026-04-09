@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ProductCard } from "@/components/product-card";
+import { ResilientImage } from "@/components/resilient-image";
 import type { Article, Product } from "@/lib/types";
 
 type Props = {
@@ -57,8 +58,6 @@ export function ArticlePageView({ article, blogTitle, relatedProducts }: Props) 
         </div>
       ) : null}
 
-      {article.image ? <img src={article.image} alt={article.title} className="article-hero__image" /> : null}
-
       <div className="article-layout">
         {article.bodyHtml ? (
           <article className="surface-card article-content" dangerouslySetInnerHTML={{ __html: article.bodyHtml }} />
@@ -79,7 +78,9 @@ export function ArticlePageView({ article, blogTitle, relatedProducts }: Props) 
             <div className="article-sidebar__list">
               {article.relatedArticles.map((item) => (
                 <Link key={item.href} href={item.href} className="article-sidebar__item">
-                  {item.image ? <img src={item.image} alt={item.title} className="article-sidebar__image" /> : null}
+                  {item.image ? (
+                    <ResilientImage src={item.image} alt={item.title} className="article-sidebar__image" />
+                  ) : null}
                   <div className="article-sidebar__body">
                     {item.tag ? <p className="article-card__tags">{item.tag}</p> : null}
                     <h3>{item.title}</h3>

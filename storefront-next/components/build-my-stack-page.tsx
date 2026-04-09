@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { AddToCartButton } from "@/components/add-to-cart-button";
 import { useCart } from "@/components/storefront-provider";
-import { formatMoney } from "@/lib/storefront";
+import { formatMoney } from "@/lib/money";
 import type { Product } from "@/lib/types";
 
 const SLOT_LABELS = [

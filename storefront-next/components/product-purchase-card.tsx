@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { AddToCartButton } from "@/components/add-to-cart-button";
-import { formatMoney } from "@/lib/storefront";
+import { formatMoney } from "@/lib/money";
 import type { Product } from "@/lib/types";
 
 export function ProductPurchaseCard({ product }: { product: Product }) {

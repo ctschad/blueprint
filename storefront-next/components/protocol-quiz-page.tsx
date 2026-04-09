@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { AddToCartButton } from "@/components/add-to-cart-button";
-import { formatMoney } from "@/lib/storefront";
+import { formatMoney } from "@/lib/money";
 import type { Product } from "@/lib/types";
 
 type QuizAnswer =
@@ -40,6 +40,14 @@ type ResultDefinition = {
   handle: string;
   supportHandles: string[];
 };
+
+const DEFAULT_SUPPORT_HANDLES = [
+  "longevity-blend-multinutrient-drink-mix-blood-orange-flavor",
+  "essentials-capsules",
+  "advanced-antioxidants",
+  "extra-virgin-olive-oil",
+  "omega-3"
+];
 
 const QUIZ_QUESTIONS: QuizQuestion[] = [
   {
@@ -248,11 +256,14 @@ export function ProtocolQuizPage({ products }: { products: Product[] }) {
     !hasStarted
       ? "protocol-quiz-hero__card--intro"
       : result && recommendedStack
-        ? "protocol-quiz-hero__card--result"
+      ? "protocol-quiz-hero__card--result"
         : "protocol-quiz-hero__card--question"
   ].join(" ");
+  const supportingHandles = result
+    ? Array.from(new Set([...result.supportHandles, ...DEFAULT_SUPPORT_HANDLES]))
+    : DEFAULT_SUPPORT_HANDLES;
   const supportingProducts = result
-    ? result.supportHandles
+    ? supportingHandles
         .map((handle) => productMap.get(handle))
         .filter((product): product is Product => Boolean(product))
     : products.filter((product) => ["easy-stack", "medium-stack", "big-stack"].includes(product.handle));
@@ -310,7 +321,7 @@ export function ProtocolQuizPage({ products }: { products: Product[] }) {
                 <p className="protocol-quiz-hero__eyebrow">The results are in</p>
                 <h1>{result.title}</h1>
                 <p className="protocol-quiz-hero__result-subtitle">{result.subtitle}</p>
-                <p>{result.description}</p>
+                <p className="protocol-quiz-hero__result-description">{result.description}</p>
 
                 <div className="protocol-quiz-hero__result-card">
                   <img
@@ -414,7 +425,11 @@ export function ProtocolQuizPage({ products }: { products: Product[] }) {
           </p>
         </div>
 
-        <div className="protocol-quiz-support__grid">
+        <div
+          className={`protocol-quiz-support__grid ${
+            !result ? "protocol-quiz-support__grid--stacks" : ""
+          }`}
+        >
           {supportingProducts.map((product) => {
             const variant = getPrimaryVariant(product);
             return (

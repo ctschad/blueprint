@@ -1,3 +1,5 @@
+import fs from "fs";
+import path from "path";
 import articlesData from "@/data/generated/articles.json";
 import blogsData from "@/data/generated/blogs.json";
 import collectionsData from "@/data/generated/collections.json";
@@ -18,16 +20,187 @@ import type {
 } from "@/lib/types";
 
 const manifest = manifestData as Manifest;
-const products = productsData as Product[];
+const hiddenMarketCollectionHandles = new Set([
+  "bc-market-bc-cz-dk-fi-ie-it-no-pl-se",
+  "market-bc",
+  "market-cz",
+  "market-dk",
+  "market-fi",
+  "market-ie",
+  "market-it",
+  "market-no",
+  "market-pl",
+  "market-se"
+]);
+
+function sanitizeProduct(product: Product): Product {
+  return {
+    ...product,
+    collectionHandles: product.collectionHandles.filter((handle) => !hiddenMarketCollectionHandles.has(handle))
+  };
+}
+
+const products = (productsData as Product[]).map(sanitizeProduct);
 const collections = collectionsData as Collection[];
 const blogs = blogsData as Blog[];
-const articles = articlesData as Article[];
 const pages = pagesData as StaticPage[];
 
 const productMap = new Map(products.map((product) => [product.handle, product]));
 const collectionMap = new Map(collections.map((collection) => [collection.handle, collection]));
 const blogMap = new Map(blogs.map((blog) => [blog.handle, blog]));
 const pageMap = new Map(pages.map((page) => [page.handle, page]));
+const articlePlaceholderImage = "/cdn/shop/files/placeholder-2_385x215_crop_center__q_526e273fc83f.png";
+const articlePublicAssetDirectory = path.join(process.cwd(), "public", "cdn", "shop", "articles");
+const articlePublicAssetFiles = new Set(
+  fs.existsSync(articlePublicAssetDirectory) ? fs.readdirSync(articlePublicAssetDirectory) : []
+);
+const filePublicAssetDirectory = path.join(process.cwd(), "public", "cdn", "shop", "files");
+const filePublicAssetFiles = new Set(
+  fs.existsSync(filePublicAssetDirectory) ? fs.readdirSync(filePublicAssetDirectory) : []
+);
+const articleAssetCandidates = Array.from(
+  new Set(
+    (articlesData as Article[]).flatMap((article) => [
+      article.image,
+      ...article.relatedArticles.map((item) => item.image)
+    ])
+  )
+).filter((image): image is string => Boolean(image && image.startsWith("/cdn/shop/articles/")));
+
+function resolveLocalArticleAssetHref(href: string) {
+  const normalizedHref = href
+    .replace("https://blueprint.bryanjohnson.com", "")
+    .replace(/\?.*$/, "");
+
+  if (!normalizedHref.startsWith("/cdn/shop/articles/")) {
+    return normalizedHref;
+  }
+
+  const fileName = normalizedHref.split("/").pop() ?? "";
+  if (!fileName) {
+    return normalizedHref;
+  }
+
+  if (articlePublicAssetFiles.has(fileName)) {
+    return normalizedHref;
+  }
+
+  const extensionIndex = fileName.lastIndexOf(".");
+  const rawStem = extensionIndex >= 0 ? fileName.slice(0, extensionIndex) : fileName;
+  const rawExtension = extensionIndex >= 0 ? fileName.slice(extensionIndex + 1) : "";
+
+  const diskMatch = Array.from(articlePublicAssetFiles).find((candidateFileName) => {
+    return (
+      candidateFileName.startsWith(`${rawStem}__q_`) &&
+      (!rawExtension || candidateFileName.endsWith(`.${rawExtension}`))
+    );
+  });
+
+  if (diskMatch) {
+    return `/cdn/shop/articles/${diskMatch}`;
+  }
+
+  const localMatch = articleAssetCandidates.find((candidate) => {
+    const candidateFileName = candidate.split("/").pop() ?? "";
+    return (
+      candidateFileName.startsWith(`${rawStem}__q_`) &&
+      (!rawExtension || candidateFileName.endsWith(`.${rawExtension}`))
+    );
+  });
+
+  return localMatch ?? normalizedHref;
+}
+
+function normalizeArticleAssetHref(href: string) {
+  if (href.startsWith("https://blueprint.bryanjohnson.com/cdn/shop/articles/") || href.startsWith("/cdn/shop/articles/")) {
+    return resolveLocalArticleAssetHref(href);
+  }
+
+  if (
+    href.startsWith("https://blueprint.bryanjohnson.com/cdn/shop/files") ||
+    href.startsWith("https://cdn.shopify.com/s/files/1/0772/3129/2701/files")
+  ) {
+    return normalizeLocalAssetHref(href);
+  }
+
+  return href;
+}
+
+function extractFirstImageFromMarkup(markup: string) {
+  const match = markup.match(/<img[^>]+src="([^"]+)"/i);
+  return match?.[1] ? normalizeArticleAssetHref(match[1]) : null;
+}
+
+function normalizeInstagramEmbeds(markup: string) {
+  const buildInstagramEmbed = (href: string) => `
+    <section class="article-embed article-embed--instagram">
+      <p class="article-embed__eyebrow">Instagram Post</p>
+      <h2 class="article-embed__title">View the original post</h2>
+      <p class="article-embed__copy">This story is published as an Instagram post. Open it on Instagram to see the full reel and caption.</p>
+      <a class="button button--solid article-embed__button" href="${href}" target="_blank" rel="noopener noreferrer">Open on Instagram</a>
+    </section>
+  `.trim();
+
+  const withoutScripts = markup.replace(
+    /<script[^>]*src=["'](?:https?:)?\/\/www\.instagram\.com\/embed\.js[^>]*><\/script>/gi,
+    ""
+  );
+
+  const normalizedEmbeds = withoutScripts.replace(
+    /<blockquote[^>]*class="instagram-media"[^>]*data-instgrm-permalink="([^"]+)"[^>]*>[\s\S]*?<\/blockquote>/gi,
+    (_match, permalink: string) => {
+      const href = decodeHtmlEntities(permalink);
+      return buildInstagramEmbed(href);
+    }
+  );
+
+  if (/instagram-media/i.test(normalizedEmbeds) && !/<\/blockquote>/i.test(normalizedEmbeds)) {
+    const permalinkMatch = normalizedEmbeds.match(/data-instgrm-permalink="([^"]+)"/i);
+    if (permalinkMatch?.[1]) {
+      return buildInstagramEmbed(decodeHtmlEntities(permalinkMatch[1]));
+    }
+  }
+
+  return normalizedEmbeds;
+}
+
+function summarizeText(value: string, maxLength = 180) {
+  const plainText = value.replace(/\s+/g, " ").trim();
+  if (!plainText) {
+    return "";
+  }
+
+  if (plainText.length <= maxLength) {
+    return plainText;
+  }
+
+  return `${plainText.slice(0, maxLength).trimEnd()}…`;
+}
+
+function sanitizeArticle(article: Article): Article {
+  const bodyHtml = normalizeLocalAssetMarkup(normalizeInstagramEmbeds(article.bodyHtml));
+  const fallbackDescription = summarizeText(stripTags(bodyHtml), 180);
+  const descriptionSource = article.description.trim() || fallbackDescription;
+  const description = descriptionSource.startsWith("View this post on Instagram")
+    ? "Open the original Instagram post to view the full reel and caption."
+    : descriptionSource;
+  const image = article.image
+    ? normalizeArticleAssetHref(article.image)
+    : extractFirstImageFromMarkup(bodyHtml) ?? articlePlaceholderImage;
+
+  return {
+    ...article,
+    image,
+    description,
+    bodyHtml,
+    relatedArticles: article.relatedArticles.map((item) => ({
+      ...item,
+      image: item.image ? normalizeArticleAssetHref(item.image) : item.image
+    }))
+  };
+}
+
+const articles = (articlesData as Article[]).map(sanitizeArticle);
 
 export function getManifest() {
   return manifest;
@@ -218,10 +391,55 @@ function normalizeLocalAssetHref(href: string) {
   return href;
 }
 
+function resolveLocalFileAssetHref(href: string) {
+  const normalizedHref = href.replace(/\?.*$/, "");
+  let localHref = normalizedHref;
+
+  if (normalizedHref.startsWith("https://blueprint.bryanjohnson.com/")) {
+    localHref = normalizedHref.replace("https://blueprint.bryanjohnson.com", "");
+  } else if (normalizedHref.startsWith("https://cdn.shopify.com/s/files/1/0772/3129/2701/files/")) {
+    localHref = normalizedHref.replace("https://cdn.shopify.com/s/files/1/0772/3129/2701/files", "/cdn/shop/files");
+  }
+
+  if (!localHref.startsWith("/cdn/shop/files/")) {
+    return href;
+  }
+
+  const fileName = localHref.split("/").pop() ?? "";
+  if (!fileName) {
+    return href;
+  }
+
+  if (filePublicAssetFiles.has(fileName)) {
+    return localHref;
+  }
+
+  const extensionIndex = fileName.lastIndexOf(".");
+  const rawStem = extensionIndex >= 0 ? fileName.slice(0, extensionIndex) : fileName;
+  const rawExtension = extensionIndex >= 0 ? fileName.slice(extensionIndex + 1) : "";
+
+  const diskMatch = Array.from(filePublicAssetFiles).find((candidateFileName) => {
+    return (
+      candidateFileName.startsWith(`${rawStem}__q_`) &&
+      (!rawExtension || candidateFileName.endsWith(`.${rawExtension}`))
+    );
+  });
+
+  if (diskMatch) {
+    return `/cdn/shop/files/${diskMatch}`;
+  }
+
+  return href;
+}
+
 function normalizeLocalAssetMarkup(markup: string) {
   return markup
-    .replaceAll("https://blueprint.bryanjohnson.com/cdn/shop/files", "/cdn/shop/files")
-    .replaceAll("https://cdn.shopify.com/s/files/1/0772/3129/2701/files", "/cdn/shop/files");
+    .replace(/https:\/\/blueprint\.bryanjohnson\.com\/cdn\/shop\/files[^\s"'()<>]*/g, (match) =>
+      resolveLocalFileAssetHref(match)
+    )
+    .replace(/https:\/\/cdn\.shopify\.com\/s\/files\/1\/0772\/3129\/2701\/files[^\s"'()<>]*/g, (match) =>
+      resolveLocalFileAssetHref(match)
+    );
 }
 
 function inferCoaCategory(product?: Product): Exclude<CoaCategory, "all"> {

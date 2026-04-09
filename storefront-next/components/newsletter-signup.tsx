@@ -17,17 +17,65 @@ type NewsletterSignupProps = {
   content: NewsletterContent;
 };
 
+function isValidEmailAddress(value: string) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+}
+
 export function NewsletterSignup({ content }: NewsletterSignupProps) {
   const [email, setEmail] = useState("");
-  const [submitted, setSubmitted] = useState(false);
+  const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
+  const [errorMessage, setErrorMessage] = useState("");
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const trimmedEmail = email.trim();
+
+    if (!trimmedEmail) {
+      setStatus("error");
+      setErrorMessage("Enter an email address to join the newsletter.");
+      return;
+    }
+
+    if (!isValidEmailAddress(trimmedEmail)) {
+      setStatus("error");
+      setErrorMessage("Please enter a valid email address.");
+      return;
+    }
+
+    setStatus("success");
+    setErrorMessage("");
+    setEmail("");
+  }
+
+  function handleChange(value: string) {
+    setEmail(value);
+
+    if (status === "success") {
+      setStatus("idle");
+    }
+
+    if (status === "error") {
+      if (!value.trim()) {
+        setErrorMessage("");
+        return;
+      }
+
+      if (isValidEmailAddress(value.trim())) {
+        setStatus("idle");
+        setErrorMessage("");
+      }
+    }
+  }
+
+  function handleBlur() {
     if (!email.trim()) {
       return;
     }
-    setSubmitted(true);
-    setEmail("");
+
+    if (!isValidEmailAddress(email.trim())) {
+      setStatus("error");
+      setErrorMessage("Please enter a valid email address.");
+    }
   }
 
   return (
@@ -46,24 +94,41 @@ export function NewsletterSignup({ content }: NewsletterSignupProps) {
           <h2>{content.heading}</h2>
           <p className="newsletter-signup__description">{content.description}</p>
 
-          <form className="newsletter-signup__form" onSubmit={handleSubmit}>
+          <form
+            className={`newsletter-signup__form ${status === "error" ? "newsletter-signup__form--error" : ""}`}
+            onSubmit={handleSubmit}
+            noValidate
+          >
             <input
               type="email"
               name="email"
               value={email}
-              onChange={(event) => setEmail(event.target.value)}
+              onChange={(event) => handleChange(event.target.value)}
+              onBlur={handleBlur}
               placeholder={content.placeholder}
               aria-label={content.placeholder}
+              aria-invalid={status === "error"}
               className="newsletter-signup__input"
-              required
+              autoComplete="email"
+              inputMode="email"
             />
             <button type="submit" className="newsletter-signup__submit" aria-label="Submit email">
               <span aria-hidden="true">→</span>
             </button>
           </form>
 
-          <p className="newsletter-signup__message" role="status" aria-live="polite">
-            {submitted ? "Thanks. You’re on the list." : "\u00A0"}
+          <p
+            className={`newsletter-signup__message ${
+              status === "error" ? "newsletter-signup__message--error" : ""
+            }`}
+            role="status"
+            aria-live="polite"
+          >
+            {status === "success"
+              ? "Thanks. You’re on the list."
+              : status === "error"
+                ? errorMessage
+                : "\u00A0"}
           </p>
         </div>
       </div>

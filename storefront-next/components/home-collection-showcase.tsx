@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { AddToCartButton } from "@/components/add-to-cart-button";
-import { formatMoney } from "@/lib/storefront";
+import { formatMoney } from "@/lib/money";
 import type { Product } from "@/lib/types";
 
 type Tab = {

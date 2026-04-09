@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 import { CollectionProductCard } from "@/components/collection-product-card";
+import { CollectionSort } from "@/components/collection-sort";
 import { getCollectionByHandle, getProductsForCollection, sortProducts } from "@/lib/storefront";
 import type { Collection } from "@/lib/types";
 
@@ -58,25 +59,12 @@ export default async function CollectionPage({
           </p>
         </div>
 
-        <details className="collection-sort">
-          <summary className="collection-sort__trigger">
-            <span>Sort By</span>
-            <span className="collection-sort__value">{activeSortLabel}</span>
-          </summary>
-
-          <div className="collection-sort__menu">
-            {SORT_OPTIONS.map((option) => (
-              <Link
-                key={option.value}
-                href={`/collections/${collectionHandle}${option.value === "featured" ? "" : `?sort=${option.value}`}`}
-                className="collection-sort__option"
-              >
-                <span className={`collection-sort__check ${sort === option.value ? "is-active" : ""}`} />
-                <span>{option.label}</span>
-              </Link>
-            ))}
-          </div>
-        </details>
+        <CollectionSort
+          collectionHandle={collectionHandle}
+          activeSort={sort}
+          activeSortLabel={activeSortLabel}
+          options={SORT_OPTIONS}
+        />
       </div>
 
       <div className="collection-page__layout">
@@ -84,7 +72,6 @@ export default async function CollectionPage({
           <div className="collection-filter">
             <div className="collection-filter__heading">
               <h2>Shop by Benefit</h2>
-              <span className="collection-filter__caret">⌃</span>
             </div>
 
             <div className="collection-filter__options">

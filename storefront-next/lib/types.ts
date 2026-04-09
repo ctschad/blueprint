@@ -144,6 +144,9 @@ export type CartLine = {
   price: number;
   quantity: number;
   image?: string | null;
+  isSubscription?: boolean;
+  basePrice?: number;
+  baseVariantTitle?: string;
 };
 
 export type AccountProfile = {

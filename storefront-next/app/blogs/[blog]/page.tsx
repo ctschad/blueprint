@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ResilientImage } from "@/components/resilient-image";
 import { getArticlesForBlog, getBlogByHandle } from "@/lib/storefront";
 
 type Params = Promise<{ blog: string }>;
@@ -26,7 +27,9 @@ export default async function BlogPage({ params }: { params: Params }) {
       <div className="article-grid">
         {articles.map((article) => (
           <Link key={article.slug} href={`/blogs/${blog}/${article.slug}`} className="article-card">
-            {article.image ? <img src={article.image} alt={article.title} className="article-card__image" /> : null}
+            {article.image ? (
+              <ResilientImage src={article.image} alt={article.title} className="article-card__image" />
+            ) : null}
             <div className="article-card__body">
               <h2>{article.title}</h2>
               <p>{article.description}</p>
