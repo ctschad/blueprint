@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { BiomarkersHealthImpacts } from "./biomarkers-health-impacts";
+import { BiomarkersFaq } from "./biomarkers-faq";
 
 const START_URL = "https://biomarkers.bryanjohnson.com/";
 
@@ -8,54 +10,79 @@ const HERO_BULLETS = [
   "Get personalized longevity insights"
 ];
 
-const VALUE_PROPS = [
-  {
-    title: "Largest number of measurements",
-    description: "Go deeper than standard lab panels with a broader baseline across the systems that shape longevity.",
-    icon: "/cdn/shop/files/biomarkers-icon-largest-number-tests__q_021735784915.png"
-  },
-  {
-    title: "Lowest price per test",
-    description: "Access two comprehensive testing windows each year at less than 1% of the cost of building it yourself.",
-    icon: "/cdn/shop/files/biomarkers-icon-lowest-test-price__q_021735784915.png"
-  },
-  {
-    title: "Protocol by Bryan Johnson",
-    description: "Use the same measurement framework that powers Bryan Johnson's testing, adapted to your own data.",
-    icon: "/cdn/shop/files/biomarkers-icon-protocol-by-bryan-johnson__q_021735784915.png"
-  }
-];
-
 const BENEFIT_AREAS = [
   {
     title: "Master your mood",
-    description: "Balance emotions under stress and conflict with clearer signal on the nutrients and hormones shaping how you feel.",
-    markers: "Cortisol • Vitamin D • Omega-3 • Magnesium",
+    description: "Balance emotions under stress + conflict.",
+    markers: ["Cortisol", "Vitamin D", "Omega-3", "Omega-6", "Homocysteine", "Magnesium", "Zinc", "Ferritin", "Thyroid Function"],
     icon: "/cdn/shop/files/biomarkers-icon-master-your-mood__q_99165d4ee4e7.png"
   },
   {
     title: "Sharpen your mind",
-    description: "Support cognition, mental clarity, and memory with a more complete view of what your brain needs to perform.",
-    markers: "Omega-3 • Vitamin D • Homocysteine",
+    description: "Support cognitive performance + clear thinking + memory.",
+    markers: [
+      "Vitamin D",
+      "Omega-3",
+      "Homocysteine",
+      "Methylmalonic Acid",
+      "Ferritin",
+      "Hemoglobin",
+      "Hematocrit",
+      "Thyroid Function",
+      "Heavy Metals",
+      "HSCRP",
+      "HBA1C",
+      "Insulin",
+      "Magnesium"
+    ],
     icon: "/cdn/shop/files/biomarkers-icon-sharpen-your-mind__q_6a7f8a117a88.png"
   },
   {
     title: "Feel energized",
-    description: "Trace fatigue back to real markers so your protocol can support energy, recovery, and day-to-day output.",
-    markers: "Ferritin • Thyroid • B vitamins",
+    description: "Don't let fatigue interfere with your day.",
+    markers: [
+      "Homocysteine",
+      "Methylmalonic Acid",
+      "Iron",
+      "Ferritin",
+      "Cortisol",
+      "Vitamin D",
+      "Sex Hormones",
+      "Hematocrit",
+      "Hemoglobin"
+    ],
     icon: "/cdn/shop/files/biomarkers-icon-feel-energized__q_99165d4ee4e7.png"
   },
   {
     title: "Catch disease-risk early",
-    description: "Flag patterns sooner and build a plan around them before they become harder, costlier problems to solve.",
-    markers: "A1C • ApoB • Inflammation • Liver",
+    description: "Monitor early signs + take action.",
+    markers: [
+      "LDL",
+      "APOB",
+      "HDL",
+      "TG",
+      "HSCRP",
+      "Glucose",
+      "Insulin",
+      "Estradiol",
+      "DHEA-S",
+      "Albumin",
+      "ALT",
+      "GGT",
+      "Blood Urea Nitrogen",
+      "Creatinine",
+      "EGFP",
+      "CBC",
+      "PSA (Male)"
+    ],
     icon: "/cdn/shop/files/biomarkers-icon-catch-disease-early__q_6a7f8a117a88.png"
   },
   {
     title: "Prolong your healthy years",
-    description: "Turn repeat testing into a long-range practice that supports a healthier trajectory, not just a single reading.",
-    markers: "Lipids • Glucose • Kidney • Longevity",
-    icon: "/cdn/shop/files/biomarkers-icon-prolong-healthy-years__q_6a7f8a117a88.png"
+    description: "Track biological age + help slow your speed of aging.",
+    markers: ["Speed of Aging", "Biological Organ Age"],
+    icon: "/cdn/shop/files/biomarkers-icon-prolong-healthy-years__q_6a7f8a117a88.png",
+    badge: "Coming soon"
   }
 ];
 
@@ -124,6 +151,11 @@ const FAQS = [
     question: "Is Biomarkers HSA/FSA eligible?",
     answer:
       "Yes. Biomarkers is HSA/FSA eligible, so you can use pre-tax health dollars to cover the membership where applicable."
+  },
+  {
+    question: "What biomarkers are included in the baseline and follow-up tests?",
+    answer:
+      "All customers are tested for up to 140 biomarkers at their baseline test and up to 86 biomarkers at their follow-up test, totaling up to 226 biomarker measurements each year. Men receive 3 additional measurements and women receive 1 additional measurement."
   }
 ];
 
@@ -172,57 +204,6 @@ export function BiomarkersPage() {
         </div>
       </section>
 
-      <section className="shell page-section biomarkers-platform">
-        <div className="biomarkers-section-heading">
-          <p className="eyebrow">Clinically-backed ingredients</p>
-          <h2>Build your personal health protocol</h2>
-          <p>
-            One secure platform to test and optimize your health. The same scientific framework as
-            Bryan Johnson, adapted to your own data.
-          </p>
-        </div>
-
-        <div className="biomarkers-platform__layout">
-          <div className="biomarkers-platform__snapshot">
-            <img
-              src="/cdn/shop/files/SALES_MODULE_3_3.png"
-              alt="Biomarkers dashboard on a laptop"
-              className="biomarkers-platform__snapshot-image"
-            />
-          </div>
-
-          <div className="biomarkers-platform__cards">
-            {VALUE_PROPS.map((item) => (
-              <article key={item.title} className="biomarkers-value-card">
-                <img src={item.icon} alt="" aria-hidden="true" className="biomarkers-value-card__icon" />
-                <h3>{item.title}</h3>
-                <p>{item.description}</p>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="shell page-section biomarkers-benefits">
-        <div className="biomarkers-section-heading biomarkers-section-heading--compact">
-          <p className="eyebrow">What a better readout unlocks</p>
-          <h2>Use your biomarkers to shape how you feel now and how you age next</h2>
-        </div>
-
-        <div className="biomarkers-benefits__grid">
-          {BENEFIT_AREAS.map((benefit) => (
-            <article key={benefit.title} className="biomarkers-benefit-card">
-              <div className="biomarkers-benefit-card__icon-wrap">
-                <img src={benefit.icon} alt="" aria-hidden="true" className="biomarkers-benefit-card__icon" />
-              </div>
-              <h3>{benefit.title}</h3>
-              <p>{benefit.description}</p>
-              <span className="biomarkers-benefit-card__markers">{benefit.markers}</span>
-            </article>
-          ))}
-        </div>
-      </section>
-
       <section id="how-it-works" className="shell page-section biomarkers-process">
         <div className="biomarkers-section-heading">
           <p className="eyebrow">How it works</p>
@@ -246,6 +227,99 @@ export function BiomarkersPage() {
               </div>
             </article>
           ))}
+        </div>
+      </section>
+
+      <section className="shell page-section biomarkers-benefits">
+        <BiomarkersHealthImpacts
+          title="Your health impacts how you feel"
+          subtitle="When health is dialed in, the rest follows."
+          image="/cdn/shop/files/biomarkers-lp-your-health-desktop__q_ae3e67bdf2c2.webp"
+          items={BENEFIT_AREAS}
+          ctaHref={START_URL}
+        />
+      </section>
+
+      <section className="shell page-section biomarkers-platform-feature">
+        <div className="biomarkers-platform-feature__header">
+          <p className="eyebrow">Biomarkers Bryan Johnson</p>
+          <h2>Build your personal health protocol</h2>
+          <p>
+            One secure platform to test and optimize your health.
+            <br />
+            The same scientific framework as Bryan Johnson, adapted to your data.
+          </p>
+        </div>
+
+        <div className="biomarkers-platform-feature__grid">
+          <article className="biomarkers-platform-feature__side">
+            <div className="biomarkers-platform-feature__phone">
+              <img
+                src="/cdn/shop/files/Biomarkers_Snapshot_2__q_da23e14c4e4f.png"
+                alt="Biomarkers app appointments and test results"
+              />
+            </div>
+            <p>
+              Get a snapshot of
+              <br />
+              your health data
+            </p>
+          </article>
+
+          <article className="biomarkers-platform-feature__center">
+            <div className="biomarkers-platform-feature__dashboard">
+              <img
+                src="/cdn/shop/files/Group_1597880606__q_a8bb7ad421aa.png"
+                alt="Biomarkers dashboard with body systems overview"
+              />
+            </div>
+            <p>
+              Learn what each
+              <br />
+              biomarker means
+            </p>
+            <a
+              href={START_URL}
+              className="biomarkers-button biomarkers-button--primary biomarkers-platform-feature__cta"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Start now — $1 / day*
+            </a>
+            <p className="biomarkers-platform-feature__privacy">We always protect your data</p>
+          </article>
+
+          <article className="biomarkers-platform-feature__side">
+            <div className="biomarkers-platform-feature__phone">
+              <img
+                src="/cdn/shop/files/AI_Health_Companion_1__q_468edb4f4c15.png"
+                alt="AI health companion app"
+              />
+            </div>
+            <p>
+              Make an action
+              <br />
+              plan with AI
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <section className="page-section biomarkers-doctor-testimonial">
+        <div className="shell biomarkers-doctor-testimonial__inner">
+          <div className="biomarkers-doctor-testimonial__portrait">
+            <img
+              src="/cdn/shop/files/rx-lp-dr-mike-mallin__q_f5163ad2322a.png"
+              alt="Dr. Mike Mallin"
+            />
+          </div>
+          <h2>Bryan Johnson&apos;s personal doctor</h2>
+          <p className="biomarkers-doctor-testimonial__quote">
+            “We spent thousands of hours identifying the biomarkers that actually matter for
+            longevity, years of mapping out how they respond to protocols and shift with health
+            changes.”
+          </p>
+          <p className="biomarkers-doctor-testimonial__name">Dr. Mike Mallin</p>
         </div>
       </section>
 
@@ -329,21 +403,40 @@ export function BiomarkersPage() {
       </section>
 
       <section id="faqs" className="shell page-section biomarkers-faq">
-        <div className="biomarkers-section-heading biomarkers-faq__header">
-          <p className="eyebrow">FAQs</p>
-          <h2>Getting started</h2>
+        <div className="biomarkers-faq__title-wrap">
+          <h2>FAQs</h2>
         </div>
 
-        <div className="biomarkers-faq__items">
-          {FAQS.map((faq) => (
-            <article key={faq.question} className="biomarkers-faq__item">
-              <h3 className="biomarkers-faq__question">{faq.question}</h3>
-              <div className="biomarkers-faq__answer">
-                <p>{faq.answer}</p>
-              </div>
-            </article>
-          ))}
+        <div className="biomarkers-faq__layout">
+          <div className="biomarkers-faq__label">
+            <h3>Getting started</h3>
+          </div>
+          <BiomarkersFaq items={FAQS} />
         </div>
+      </section>
+
+      <section className="biomarkers-footer-cta">
+        <a
+          href={START_URL}
+          className="biomarkers-footer-cta__link"
+          target="_blank"
+          rel="noreferrer"
+        >
+          <picture>
+            <source
+              media="(max-width: 767px)"
+              srcSet="/cdn/shop/files/rx-lp-footer-banner-mobile__q_ea4bcfbf2e50.jpg"
+            />
+            <img
+              src="/cdn/shop/files/rx-lp-footer-banner-desktop__q_dcf296e46fc5.jpg"
+              alt="Health is forgotten until it's the only thing that matters"
+              className="biomarkers-footer-cta__image"
+            />
+          </picture>
+        </a>
+        <p className="biomarkers-footer-cta__disclaimer">
+          * Billed Annually | Cancel Anytime | HSA/FSA Eligible | Results in a Week
+        </p>
       </section>
     </div>
   );

@@ -5640,7 +5640,7 @@ button {
 }
 
 .biomarkers-page {
-  padding-bottom: 4rem;
+  padding-bottom: 0;
 }
 
 .biomarkers-page .page-section {
@@ -5906,6 +5906,319 @@ button {
   gap: 1rem;
 }
 
+.biomarkers-health-impacts {
+  display: grid;
+  grid-template-columns: minmax(340px, 0.94fr) minmax(0, 1fr);
+  gap: 2.2rem;
+  align-items: start;
+}
+
+.biomarkers-health-impacts__visual {
+  position: relative;
+  align-self: start;
+  height: 48rem;
+  min-height: 48rem;
+  overflow: hidden;
+  border-radius: 0;
+  background: #1b315f;
+}
+
+.biomarkers-health-impacts__image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.biomarkers-health-impacts__overlay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  align-content: start;
+  gap: 1.6rem;
+  padding: clamp(2rem, 3vw, 3rem);
+  color: #f6f4ec;
+  background: linear-gradient(180deg, rgba(19, 39, 76, 0.3) 0%, rgba(19, 39, 76, 0.08) 32%, rgba(19, 39, 76, 0.14) 100%);
+}
+
+.biomarkers-health-impacts__overlay h2 {
+  max-width: 12ch;
+  margin: 0;
+  font-size: clamp(2.6rem, 4vw, 4rem);
+  line-height: 0.98;
+  letter-spacing: -0.05em;
+}
+
+.biomarkers-health-impacts__overlay p {
+  margin: 0;
+  max-width: 24rem;
+  color: rgba(246, 244, 236, 0.92);
+  font-size: 1.1rem;
+  line-height: 1.55;
+}
+
+.biomarkers-health-impacts__content {
+  display: grid;
+  align-content: start;
+  gap: 2.4rem;
+  padding-top: 0.75rem;
+}
+
+.biomarkers-health-impacts__items {
+  border-top: 1px solid rgba(17, 28, 53, 0.24);
+}
+
+.biomarkers-health-impacts__item {
+  border-bottom: 1px solid rgba(17, 28, 53, 0.24);
+}
+
+.biomarkers-health-impacts__trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  width: 100%;
+  padding: 1.55rem 0 1.45rem;
+  border: 0;
+  background: transparent;
+  color: #111c35;
+  text-align: left;
+  cursor: pointer;
+}
+
+.biomarkers-health-impacts__trigger-main {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.biomarkers-health-impacts__icon {
+  width: 1.75rem;
+  height: 1.75rem;
+  object-fit: contain;
+  flex: none;
+}
+
+.biomarkers-health-impacts__trigger-title {
+  color: #111c35;
+  font-size: clamp(1.85rem, 2.4vw, 2.6rem);
+  line-height: 1.05;
+  letter-spacing: -0.045em;
+}
+
+.biomarkers-health-impacts__badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: rgba(17, 28, 53, 0.46);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  box-shadow: none;
+  white-space: nowrap;
+}
+
+.biomarkers-health-impacts__toggle {
+  flex: none;
+  color: #111c35;
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.biomarkers-health-impacts__panel {
+  display: grid;
+  gap: 1.15rem;
+  padding: 0 0 1.55rem 2.75rem;
+}
+
+.biomarkers-health-impacts__panel p {
+  margin: 0;
+  color: #111c35;
+  font-size: 1.1rem;
+  line-height: 1.55;
+}
+
+.biomarkers-health-impacts__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+}
+
+.biomarkers-health-impacts__chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.45rem;
+  padding: 0.42rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid rgba(17, 28, 53, 0.08);
+  background: rgba(255, 255, 255, 0.34);
+  color: #111c35;
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  box-shadow: none;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.biomarkers-health-impacts__cta {
+  min-width: min(100%, 18rem);
+  justify-self: start;
+  padding-left: 1.8rem;
+  padding-right: 1.8rem;
+  background: #111c35;
+  border-color: #111c35;
+  color: #f6f4ec;
+}
+
+.biomarkers-platform-feature {
+  display: grid;
+  gap: 2.4rem;
+}
+
+.biomarkers-platform-feature__header {
+  display: grid;
+  gap: 1rem;
+  justify-items: center;
+  text-align: center;
+}
+
+.biomarkers-platform-feature__header h2 {
+  margin: 0;
+  color: #111c35;
+  font-size: clamp(2.5rem, 4vw, 4.2rem);
+  line-height: 0.98;
+  letter-spacing: -0.05em;
+}
+
+.biomarkers-platform-feature__header p:last-child {
+  margin: 0;
+  color: rgba(17, 28, 53, 0.82);
+  font-size: 1.22rem;
+  line-height: 1.45;
+}
+
+.biomarkers-platform-feature__grid {
+  display: grid;
+  grid-template-columns: minmax(160px, 0.72fr) minmax(0, 1.56fr) minmax(160px, 0.72fr);
+  gap: 1.2rem;
+  align-items: end;
+}
+
+.biomarkers-platform-feature__side,
+.biomarkers-platform-feature__center {
+  display: grid;
+  justify-items: center;
+  text-align: center;
+}
+
+.biomarkers-platform-feature__side {
+  gap: 1rem;
+}
+
+.biomarkers-platform-feature__center {
+  gap: 1.15rem;
+}
+
+.biomarkers-platform-feature__phone,
+.biomarkers-platform-feature__dashboard {
+  overflow: hidden;
+  border-radius: 18px;
+}
+
+.biomarkers-platform-feature__phone img,
+.biomarkers-platform-feature__dashboard img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.biomarkers-platform-feature__phone {
+  width: min(100%, 12rem);
+}
+
+.biomarkers-platform-feature__dashboard {
+  width: min(100%, 100%);
+  max-width: 44rem;
+}
+
+.biomarkers-platform-feature__side p,
+.biomarkers-platform-feature__center > p {
+  margin: 0;
+  color: #111c35;
+  font-size: 1rem;
+  line-height: 1.35;
+}
+
+.biomarkers-platform-feature__cta {
+  margin-top: 0.3rem;
+}
+
+.biomarkers-platform-feature__privacy {
+  color: rgba(17, 28, 53, 0.62);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.biomarkers-doctor-testimonial {
+  background: #152445;
+  color: #f6f4ec;
+}
+
+.biomarkers-doctor-testimonial__inner {
+  display: grid;
+  justify-items: center;
+  gap: 1.6rem;
+  padding-top: clamp(3rem, 5vw, 5rem);
+  padding-bottom: clamp(3.2rem, 5vw, 5rem);
+  text-align: center;
+}
+
+.biomarkers-doctor-testimonial__portrait {
+  width: 10.125rem;
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.biomarkers-doctor-testimonial__portrait img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.biomarkers-doctor-testimonial h2 {
+  margin: 0;
+  color: #f6f4ec;
+  font-size: clamp(2.55rem, 4vw, 4.25rem);
+  line-height: 1.02;
+  letter-spacing: -0.05em;
+}
+
+.biomarkers-doctor-testimonial__quote {
+  width: min(100%, 54rem);
+  margin: 0;
+  color: rgba(246, 244, 236, 0.94);
+  font-size: clamp(1.4rem, 2.1vw, 2rem);
+  line-height: 1.35;
+}
+
+.biomarkers-doctor-testimonial__name {
+  margin: 0;
+  color: #f6f4ec;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
 .biomarkers-benefit-card {
   display: grid;
   gap: 1rem;
@@ -6079,49 +6392,139 @@ button {
 
 .biomarkers-faq {
   display: grid;
-  gap: 1.6rem;
+  gap: 1.8rem;
 }
 
-.biomarkers-faq__header {
-  margin-bottom: 0.35rem;
+.biomarkers-page .biomarkers-faq.page-section {
+  padding-bottom: 0.75rem;
 }
 
-.biomarkers-faq__items {
+.biomarkers-faq__title-wrap {
   display: grid;
-  gap: 0.9rem;
-  width: min(100%, 60rem);
-  justify-items: stretch;
+  justify-items: center;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid rgba(17, 28, 53, 0.2);
 }
 
-.biomarkers-faq__item {
-  border: 1px solid rgba(17, 28, 53, 0.08);
-  border-radius: 22px;
-  background: rgba(255, 255, 255, 0.78);
-  box-shadow: 0 16px 36px rgba(17, 28, 53, 0.05);
-  padding: 1.35rem;
+.biomarkers-faq__title-wrap h2 {
+  margin: 0;
+  color: #111c35;
+  font-size: clamp(2.6rem, 4vw, 4rem);
+  line-height: 1;
+  letter-spacing: -0.05em;
 }
 
-.biomarkers-faq__question {
+.biomarkers-faq__layout {
+  display: grid;
+  grid-template-columns: minmax(180px, 0.26fr) minmax(0, 1fr);
+  gap: 3.75rem;
+  align-items: start;
+}
+
+.biomarkers-faq__label h3 {
   margin: 0;
   color: #111c35;
   font-size: 1.05rem;
-  font-weight: 600;
-  line-height: 1.45;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
 }
 
-.biomarkers-faq__answer {
-  padding-top: 0.6rem;
-  color: rgba(17, 28, 53, 0.78);
-  line-height: 1.65;
+.biomarkers-faq-accordion {
+  display: grid;
 }
 
-.biomarkers-faq__answer p {
+.biomarkers-faq-row {
+  border-top: 1px solid rgba(17, 28, 53, 0.55);
+}
+
+.biomarkers-faq-row:last-child {
+  border-bottom: 1px solid rgba(17, 28, 53, 0.55);
+}
+
+.biomarkers-faq-row__trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  width: 100%;
+  padding: 1.7rem 0;
+  border: 0;
+  background: transparent;
+  color: #111c35;
+  font-size: clamp(1.45rem, 2.15vw, 2.1rem);
+  line-height: 1.18;
+  letter-spacing: -0.03em;
+  text-align: left;
+  cursor: pointer;
+}
+
+.biomarkers-faq-row__icon {
+  flex: none;
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.biomarkers-faq-row__answer {
+  padding: 0 3rem 1.65rem 0;
+}
+
+.biomarkers-faq-row__answer p {
   margin: 0;
+  color: rgba(17, 28, 53, 0.78);
+  font-size: 1rem;
+  line-height: 1.7;
+}
+
+.biomarkers-footer-cta {
+  display: grid;
+  gap: 0;
+}
+
+.biomarkers-footer-cta__link,
+.biomarkers-footer-cta__link picture {
+  display: block;
+}
+
+.biomarkers-footer-cta__image {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.biomarkers-footer-cta__disclaimer {
+  margin: 0;
+  padding: 0.35rem 1.9rem 0;
+  color: rgba(17, 28, 53, 0.82);
+  font-size: 0.88rem;
+  line-height: 1.4;
+}
+
+.biomarkers-footer-cta + .site-footer {
+  padding-top: 0;
 }
 
 @media (max-width: 1200px) {
   .biomarkers-benefits__grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .biomarkers-platform-feature__grid {
+    grid-template-columns: minmax(140px, 0.72fr) minmax(0, 1.36fr) minmax(140px, 0.72fr);
+  }
+
+  .biomarkers-health-impacts {
+    grid-template-columns: minmax(300px, 0.88fr) minmax(0, 1fr);
+    gap: 1.5rem;
+  }
+
+  .biomarkers-health-impacts__visual {
+    height: 42rem;
+    min-height: 42rem;
+  }
+
+  .biomarkers-health-impacts__trigger-title {
+    font-size: 1.9rem;
   }
 
   .biomarkers-process__grid {
@@ -6132,14 +6535,18 @@ button {
 @media (max-width: 960px) {
   .biomarkers-hero,
   .biomarkers-platform__layout,
+  .biomarkers-platform-feature__grid,
   .biomarkers-proof__panel,
-  .biomarkers-membership__panel {
+  .biomarkers-membership__panel,
+  .biomarkers-health-impacts {
     grid-template-columns: 1fr;
   }
 
   .biomarkers-hero__image,
   .biomarkers-platform__snapshot,
-  .biomarkers-membership__media {
+  .biomarkers-membership__media,
+  .biomarkers-health-impacts__visual {
+    height: 22rem;
     min-height: 22rem;
   }
 
@@ -6147,6 +6554,31 @@ button {
   .biomarkers-price-card__features,
   .biomarkers-proof__metrics {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .biomarkers-faq__layout {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .biomarkers-platform-feature__side {
+    order: 2;
+  }
+
+  .biomarkers-platform-feature__center {
+    order: 1;
+  }
+
+  .biomarkers-platform-feature__phone {
+    width: min(100%, 11rem);
+  }
+
+  .biomarkers-platform-feature__dashboard {
+    max-width: 38rem;
+  }
+
+  .biomarkers-health-impacts__content {
+    padding-top: 0;
   }
 }
 
@@ -6181,6 +6613,114 @@ button {
   .biomarkers-price-card__features,
   .biomarkers-proof__metrics {
     grid-template-columns: 1fr;
+  }
+
+  .biomarkers-platform-feature__header h2 {
+    font-size: 2.3rem;
+  }
+
+  .biomarkers-platform-feature__header p:last-child {
+    font-size: 1rem;
+  }
+
+  .biomarkers-platform-feature__grid {
+    gap: 1.4rem;
+  }
+
+  .biomarkers-platform-feature__side,
+  .biomarkers-platform-feature__center {
+    gap: 0.85rem;
+  }
+
+  .biomarkers-platform-feature__dashboard {
+    max-width: 100%;
+  }
+
+  .biomarkers-faq__title-wrap {
+    justify-items: start;
+    padding-bottom: 1.2rem;
+    border-bottom-color: rgba(17, 28, 53, 0.16);
+  }
+
+  .biomarkers-faq__title-wrap h2 {
+    font-size: 2rem;
+  }
+
+  .biomarkers-faq__label h3 {
+    font-size: 0.92rem;
+  }
+
+  .biomarkers-faq-row__trigger {
+    padding: 1.25rem 0;
+    font-size: 1.18rem;
+  }
+
+  .biomarkers-faq-row__icon {
+    font-size: 1.55rem;
+  }
+
+  .biomarkers-faq-row__answer {
+    padding-right: 0;
+    padding-bottom: 1.2rem;
+  }
+
+  .biomarkers-footer-cta__disclaimer {
+    padding: 0.2rem 1rem 0;
+    font-size: 0.66rem;
+  }
+
+  .biomarkers-footer-cta + .site-footer {
+    padding-top: 0;
+  }
+
+  .biomarkers-doctor-testimonial__inner {
+    gap: 1.2rem;
+    padding-top: 2.8rem;
+    padding-bottom: 3rem;
+  }
+
+  .biomarkers-doctor-testimonial__portrait {
+    width: 8rem;
+  }
+
+  .biomarkers-doctor-testimonial__quote {
+    font-size: 1.2rem;
+  }
+
+  .biomarkers-health-impacts__visual {
+    height: 30rem;
+    min-height: 30rem;
+    border-radius: 28px;
+  }
+
+  .biomarkers-health-impacts__overlay {
+    padding: 1.5rem;
+  }
+
+  .biomarkers-health-impacts__overlay h2 {
+    max-width: 10ch;
+    font-size: 2.6rem;
+  }
+
+  .biomarkers-health-impacts__trigger {
+    padding-top: 1.2rem;
+    padding-bottom: 1.15rem;
+  }
+
+  .biomarkers-health-impacts__trigger-main {
+    align-items: flex-start;
+  }
+
+  .biomarkers-health-impacts__trigger-title {
+    font-size: 1.65rem;
+  }
+
+  .biomarkers-health-impacts__panel {
+    padding-left: 0;
+  }
+
+  .biomarkers-health-impacts__badge {
+    margin-top: 0;
   }
 
   .biomarkers-value-card,
