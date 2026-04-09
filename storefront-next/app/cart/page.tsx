@@ -1,5 +1,1 @@
-import { CartPageView } from "@/components/cart-page-view";
-
-export default function CartPage() {
-  return <CartPageView />;
-}
+export { default } from "./cart-route";

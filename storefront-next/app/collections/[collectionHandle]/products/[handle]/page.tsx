@@ -1,8 +1,1 @@
-import { redirect } from "next/navigation";
-
-type Params = Promise<{ collectionHandle: string; handle: string }>;
-
-export default async function NestedProductRedirect({ params }: { params: Params }) {
-  const { handle } = await params;
-  redirect(`/products/${handle}`);
-}
+export { default } from "./collection-product-redirect-route";
