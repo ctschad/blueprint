@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ProductCard } from "@/components/product-card";
+import { RichContentRenderer } from "@/components/rich-content-renderer";
 import { ResilientImage } from "@/components/resilient-image";
 import type { Article, Product } from "@/lib/types";
 
@@ -60,7 +61,9 @@ export function ArticlePageView({ article, blogTitle, relatedProducts }: Props) 
 
       <div className="article-layout">
         {article.bodyHtml ? (
-          <article className="surface-card article-content" dangerouslySetInnerHTML={{ __html: article.bodyHtml }} />
+          <article className="surface-card article-content">
+            <RichContentRenderer blocks={article.bodyBlocks ?? []} />
+          </article>
         ) : (
           <div className="empty-state">
             <h2>This article is still being prepared.</h2>

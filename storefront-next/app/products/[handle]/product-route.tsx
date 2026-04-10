@@ -1,9 +1,10 @@
 import Link from "next/link";
+import { RichContentRenderer } from "@/components/rich-content-renderer";
 import { notFound } from "next/navigation";
 import { ProductCard } from "@/components/product-card";
 import { ProductGallery } from "@/components/product-gallery";
 import { ProductPurchaseCard } from "@/components/product-purchase-card";
-import { cleanRichText, getProductByHandle, getProductRecommendations } from "@/lib/storefront";
+import { getProductByHandle, getProductRecommendations } from "@/lib/storefront";
 
 type Params = Promise<{ handle: string }>;
 
@@ -59,7 +60,7 @@ export default async function ProductRoute({ params }: { params: Params }) {
 
         <div className="surface-card rich-text">
           <p className="eyebrow">Description</p>
-          <div dangerouslySetInnerHTML={{ __html: cleanRichText(product.descriptionHtml) }} />
+          <RichContentRenderer blocks={product.descriptionBlocks ?? []} />
         </div>
 
         <div className="page-heading">

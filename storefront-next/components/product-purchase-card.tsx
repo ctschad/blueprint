@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { AddToCartButton } from "@/components/add-to-cart-button";
 import { formatMoney } from "@/lib/money";
+import { isSubscriptionEligible } from "@/lib/subscription-eligibility";
 import type { Product } from "@/lib/types";
 
 export function ProductPurchaseCard({ product }: { product: Product }) {
@@ -63,7 +64,7 @@ export function ProductPurchaseCard({ product }: { product: Product }) {
         disabled={!selectedVariant.available}
       />
 
-      {product.sellingPlanGroups.length > 0 ? (
+      {product.sellingPlanGroups.length > 0 && isSubscriptionEligible(product.handle) ? (
         <div className="purchase-card__subscription-note">
           <p>Subscription plans are available for this product.</p>
           <ul>

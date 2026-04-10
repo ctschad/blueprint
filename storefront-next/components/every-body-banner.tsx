@@ -1,3 +1,5 @@
+import { OptimizedImage } from "@/components/optimized-image";
+
 type EveryBodyBannerContent = {
   titleLineOne: string;
   titleLineTwo: string;
@@ -82,7 +84,12 @@ export function EveryBodyBanner({ content }: { content: EveryBodyBannerContent }
         </div>
 
         <div className="every-body-banner__media">
-          <img src={content.image.src} alt={content.image.alt} className="every-body-banner__image" />
+          <OptimizedImage
+            src={content.image.src}
+            alt={content.image.alt}
+            className="every-body-banner__image"
+            sizes="(min-width: 1200px) 40vw, 100vw"
+          />
         </div>
       </div>
     </section>

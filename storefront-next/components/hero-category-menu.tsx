@@ -3,6 +3,7 @@
 import Link from "next/link";
 import type { FocusEvent, ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
+import { OptimizedImage } from "@/components/optimized-image";
 import { shopByCategoryMenu } from "@/lib/home-content";
 
 type MenuLink = {
@@ -209,7 +210,12 @@ export function HeroCategoryMenu({
             {shopByCategoryMenu.featureCards.map((card) => (
               <div key={card.title} className="hero-category-menu__feature-card">
                 <NavLink item={card} className="hero-category-menu__feature-image-link" onClick={() => setOpen(false)}>
-                  <img src={card.image} alt={card.alt} className="hero-category-menu__feature-image" />
+                  <OptimizedImage
+                    src={card.image}
+                    alt={card.alt}
+                    className="hero-category-menu__feature-image"
+                    sizes="20rem"
+                  />
                 </NavLink>
                 <NavLink item={card} className="hero-category-menu__feature-link" onClick={() => setOpen(false)} />
               </div>

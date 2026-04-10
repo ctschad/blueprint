@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { OptimizedImage } from "@/components/optimized-image";
 import type { ProductImage } from "@/lib/types";
 
 export function ProductGallery({ images, title }: { images: ProductImage[]; title: string }) {
@@ -14,7 +15,13 @@ export function ProductGallery({ images, title }: { images: ProductImage[]; titl
   return (
     <div className="product-gallery">
       <div className="product-gallery__stage">
-        <img src={active.src} alt={active.alt || title} className="product-gallery__main-image" />
+        <OptimizedImage
+          src={active.src}
+          alt={active.alt || title}
+          className="product-gallery__main-image"
+          sizes="(min-width: 1200px) 48vw, 100vw"
+          priority
+        />
       </div>
 
       {images.length > 1 ? (
@@ -26,7 +33,12 @@ export function ProductGallery({ images, title }: { images: ProductImage[]; titl
               className={`product-gallery__thumb ${selected === index ? "is-active" : ""}`}
               onClick={() => setSelected(index)}
             >
-              <img src={image.src} alt={image.alt || title} />
+              <OptimizedImage
+                src={image.src}
+                alt={image.alt || title}
+                className="product-gallery__thumb-image"
+                sizes="(min-width: 1200px) 10vw, 18vw"
+              />
             </button>
           ))}
         </div>

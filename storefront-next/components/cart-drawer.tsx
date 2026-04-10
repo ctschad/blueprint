@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { OptimizedImage } from "@/components/optimized-image";
 import { useCart } from "@/components/storefront-provider";
 import { formatMoney } from "@/lib/money";
 
@@ -12,7 +13,7 @@ const UPSELL_POOL = [
     handle: "longevity-blend-multinutrient-drink-mix-blood-orange-flavor",
     title: "Longevity Mix - Blood Orange",
     price: 4900,
-    image: "https://blueprint.bryanjohnson.com/cdn/shop/files/Blueprint_Longevity_Mix_supplement_pouch.webp?v=1769456711",
+    image: "/cdn/shop/files/Blueprint_Longevity_Mix_supplement_pouch__q_f1eb4220531e.webp",
     variantId: 47190798696733,
     variantTitle: "Blood Orange / 1 Pouch"
   },
@@ -20,7 +21,7 @@ const UPSELL_POOL = [
     handle: "essentials-capsules",
     title: "Essential Capsules",
     price: 4900,
-    image: "https://blueprint.bryanjohnson.com/cdn/shop/files/Blueprint_Essential_Capsules_Supplement_bottle.webp?v=1769456823",
+    image: "/cdn/shop/files/Blueprint_Essential_Capsules_Supplement_bottle__q_7ee74f4aae27.webp",
     variantId: 47190771564829,
     variantTitle: "Default Title"
   },
@@ -28,7 +29,7 @@ const UPSELL_POOL = [
     handle: "advanced-antioxidants",
     title: "Advanced Antioxidants",
     price: 4900,
-    image: "https://blueprint.bryanjohnson.com/cdn/shop/files/Blueprint_Advanced_Antioxidants_Supplement_Bottle_Delayed_Release_Capsules.webp?v=1769456712",
+    image: "/cdn/shop/files/Blueprint_Advanced_Antioxidants_Supplement_Bottle_Delayed_Release_Capsules__q_8c72b8688f11.webp",
     variantId: 47190784639261,
     variantTitle: "Default Title"
   },
@@ -36,7 +37,7 @@ const UPSELL_POOL = [
     handle: "extra-virgin-olive-oil",
     title: "Extra Virgin Olive Oil",
     price: 3900,
-    image: "https://blueprint.bryanjohnson.com/cdn/shop/files/Blueprint_Snake_Oil_Extra_Virgin_Olive_Oil_Bottle_Longevity_EVOO.webp?v=1769456712",
+    image: "/cdn/shop/files/Blueprint_Snake_Oil_Extra_Virgin_Olive_Oil_Bottle_Longevity_EVOO__q_6ea16e449e90.webp",
     variantId: 47471239790877,
     variantTitle: "1 Bottle"
   },
@@ -44,7 +45,7 @@ const UPSELL_POOL = [
     handle: "omega-3",
     title: "Omega-3",
     price: 3900,
-    image: "https://blueprint.bryanjohnson.com/cdn/shop/files/Blueprint_Omega_3_supplement_bottle_1.webp?v=1769456711",
+    image: "/cdn/shop/files/Blueprint_Omega_3_supplement_bottle_1__q_b0bfdd06463c.webp",
     variantId: 50548443185437,
     variantTitle: "Default Title"
   },
@@ -52,7 +53,7 @@ const UPSELL_POOL = [
     handle: "creatine",
     title: "Creatine",
     price: 4000,
-    image: "https://blueprint.bryanjohnson.com/cdn/shop/files/Blueprint_Creatine_supplement_pouch.webp?v=1769456712",
+    image: "/cdn/shop/files/Blueprint_Creatine_supplement_pouch__q_2f1abb0ed6cb.webp",
     variantId: 49472442630429,
     variantTitle: "Default Title"
   },
@@ -60,7 +61,7 @@ const UPSELL_POOL = [
     handle: "collagen",
     title: "Collagen Peptides",
     price: 4500,
-    image: "https://blueprint.bryanjohnson.com/cdn/shop/files/Blueprint_Collagen_supplement_pouch.webp?v=1769456768",
+    image: "/cdn/shop/files/Blueprint_Collagen_supplement_pouch__q_4a88daf42efe.webp",
     variantId: 49472446628125,
     variantTitle: "Default Title"
   },
@@ -68,7 +69,7 @@ const UPSELL_POOL = [
     handle: "ceremonial-matcha",
     title: "Ceremonial Grade Matcha",
     price: 3500,
-    image: "https://blueprint.bryanjohnson.com/cdn/shop/files/Blueprint_Matcha_Powder_Ceremonial_Grade_Green_Tea_Pouch.webp?v=1769456899",
+    image: "/cdn/shop/files/Blueprint_Matcha_Powder_Ceremonial_Grade_Green_Tea_Pouch__q_a333039ef597.webp",
     variantId: 49411367076125,
     variantTitle: "Default Title"
   },
@@ -76,7 +77,7 @@ const UPSELL_POOL = [
     handle: "raw-macadamias",
     title: "Raw Macadamias",
     price: 3500,
-    image: "https://blueprint.bryanjohnson.com/cdn/shop/files/Blueprint_Raw_Macadamias_Unsalted_Single_Ingredient_Superfood_Pouch.webp?v=1769456903",
+    image: "/cdn/shop/files/Blueprint_Raw_Macadamias_Unsalted_Single_Ingredient_Superfood_Pouch__q_dd4d6501a1a3.webp",
     variantId: 49182996300061,
     variantTitle: "Default Title"
   },
@@ -84,7 +85,7 @@ const UPSELL_POOL = [
     handle: "super-shrooms",
     title: "Super Shrooms",
     price: 3500,
-    image: "https://blueprint.bryanjohnson.com/cdn/shop/files/Blueprint_Super_Shrooms_Functional_Mushroom_Blend_Pouch.webp?v=1769456649",
+    image: "/cdn/shop/files/Blueprint_Super_Shrooms_Functional_Mushroom_Blend_Pouch__q_c3c13715ac15.webp",
     variantId: 49480034091293,
     variantTitle: "Default Title"
   }
@@ -145,8 +146,13 @@ function TrustIcon({ type }: { type: (typeof TRUST_MARKERS)[number]["icon"] }) {
 export function CartDrawer() {
   const { lines, isOpen, closeCart, removeLine, updateQuantity, subtotal, addItem } = useCart();
   const [subscriptionUpsells, setSubscriptionUpsells] = useState<Record<string, boolean>>({});
-  const cartHandles = new Set(lines.map((line) => line.productHandle));
-  const visibleUpsells = UPSELL_POOL.filter((item) => !cartHandles.has(item.handle)).slice(0, 3);
+  const visibleUpsells = useMemo(
+    () => {
+      const cartHandles = new Set(lines.map((line) => line.productHandle));
+      return UPSELL_POOL.filter((item) => !cartHandles.has(item.handle)).slice(0, 3);
+    },
+    [lines]
+  );
   const visibleUpsellHandlesKey = visibleUpsells.map((item) => item.handle).join("|");
 
   const remainingForFreeShipping = Math.max(0, FREE_SHIPPING_THRESHOLD - subtotal);
@@ -175,7 +181,7 @@ export function CartDrawer() {
 
       return Object.fromEntries(nextEntries);
     });
-  }, [visibleUpsellHandlesKey]);
+  }, [visibleUpsellHandlesKey, visibleUpsells]);
 
   function toggleUpsell(handle: string) {
     setSubscriptionUpsells((current) => ({
@@ -238,7 +244,14 @@ export function CartDrawer() {
                 {lines.map((line) => (
                   <article key={line.id} className="cart-line">
                     <Link href={`/products/${line.productHandle}`} onClick={closeCart} className="cart-line__image-link">
-                      {line.image ? <img src={line.image} alt={line.productTitle} className="cart-line__image" /> : null}
+                      {line.image ? (
+                        <OptimizedImage
+                          src={line.image}
+                          alt={line.productTitle}
+                          className="cart-line__image"
+                          sizes="5.25rem"
+                        />
+                      ) : null}
                     </Link>
                     <div className="cart-line__content">
                       <div>
@@ -277,7 +290,12 @@ export function CartDrawer() {
               {visibleUpsells.map((item) => (
                 <article key={item.handle} className="cart-drawer__upsell-item">
                   <Link href={`/products/${item.handle}`} onClick={closeCart} className="cart-drawer__upsell-image-wrap">
-                    <img src={item.image} alt={item.title} className="cart-drawer__upsell-image" />
+                    <OptimizedImage
+                      src={item.image}
+                      alt={item.title}
+                      className="cart-drawer__upsell-image"
+                      sizes="6.75rem"
+                    />
                   </Link>
 
                   <div className="cart-drawer__upsell-content">

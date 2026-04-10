@@ -7,6 +7,7 @@ import {
   useState,
   type ReactNode
 } from "react";
+import { isSubscriptionEligible } from "@/lib/subscription-eligibility";
 import type { AccountProfile, CartLine } from "@/lib/types";
 
 type CartContextValue = {
@@ -31,6 +32,14 @@ type AccountContextValue = {
 
 const CART_STORAGE_KEY = "blueprint-next-cart";
 const ACCOUNT_STORAGE_KEY = "blueprint-next-account";
+const STORAGE_VERSION = 2;
+const STORAGE_TTL_MS = 1000 * 60 * 60 * 24 * 30;
+
+type StoredEnvelope<T> = {
+  data: T;
+  updatedAt: number;
+  version: number;
+};
 
 const DEFAULT_PACK_LABELS: Record<string, string> = {
   "advanced-antioxidants": "1 Bottle",
@@ -61,26 +70,98 @@ const DEFAULT_PACK_LABELS: Record<string, string> = {
   "skincare-stack": "1 Set"
 };
 
-const SUBSCRIPTION_INELIGIBLE_HANDLES = new Set(["laser-cap"]);
-
 const CartContext = createContext<CartContextValue | undefined>(undefined);
 const AccountContext = createContext<AccountContextValue | undefined>(undefined);
 
-function readStoredCart() {
+function isStoredEnvelope<T>(value: unknown): value is StoredEnvelope<T> {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "data" in value &&
+    "updatedAt" in value &&
+    "version" in value &&
+    typeof (value as StoredEnvelope<T>).updatedAt === "number" &&
+    typeof (value as StoredEnvelope<T>).version === "number"
+  );
+}
+
+function isCartLine(value: unknown): value is CartLine {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    typeof (value as CartLine).id === "string" &&
+    typeof (value as CartLine).productHandle === "string" &&
+    typeof (value as CartLine).productTitle === "string" &&
+    typeof (value as CartLine).variantId === "number" &&
+    typeof (value as CartLine).variantTitle === "string" &&
+    typeof (value as CartLine).price === "number" &&
+    typeof (value as CartLine).quantity === "number"
+  );
+}
+
+function isAccountProfile(value: unknown): value is AccountProfile {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    typeof (value as AccountProfile).signedIn === "boolean" &&
+    typeof (value as AccountProfile).name === "string" &&
+    typeof (value as AccountProfile).email === "string"
+  );
+}
+
+function readStoredValue<T>(key: string, fallback: T, validate: (value: unknown) => value is T) {
   if (typeof window === "undefined") {
-    return [];
+    return fallback;
   }
 
-  const raw = window.localStorage.getItem(CART_STORAGE_KEY);
+  const raw = window.localStorage.getItem(key);
   if (!raw) {
-    return [];
+    return fallback;
   }
 
   try {
-    return (JSON.parse(raw) as CartLine[]).map(normalizeCartLine);
+    const parsed = JSON.parse(raw) as unknown;
+    if (!isStoredEnvelope<T>(parsed)) {
+      window.localStorage.removeItem(key);
+      return fallback;
+    }
+
+    if (
+      parsed.version !== STORAGE_VERSION ||
+      Date.now() - parsed.updatedAt > STORAGE_TTL_MS ||
+      !validate(parsed.data)
+    ) {
+      window.localStorage.removeItem(key);
+      return fallback;
+    }
+
+    return parsed.data;
   } catch {
-    return [];
+    window.localStorage.removeItem(key);
+    return fallback;
   }
+}
+
+function writeStoredValue<T>(key: string, data: T) {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  const payload: StoredEnvelope<T> = {
+    data,
+    updatedAt: Date.now(),
+    version: STORAGE_VERSION
+  };
+
+  window.localStorage.setItem(key, JSON.stringify(payload));
+}
+
+function readStoredCart() {
+  return readStoredValue(
+    CART_STORAGE_KEY,
+    [] as CartLine[],
+    (value): value is CartLine[] => Array.isArray(value) && value.every(isCartLine)
+  ).map(normalizeCartLine);
 }
 
 function isSubscriptionTitle(variantTitle: string) {
@@ -101,10 +182,6 @@ function hasMeaningfulVariantTitle(variantTitle: string, productTitle: string) {
 
 function getFallbackVariantTitle(productHandle: string) {
   return DEFAULT_PACK_LABELS[productHandle] ?? "";
-}
-
-function isSubscriptionEligible(productHandle: string) {
-  return !SUBSCRIPTION_INELIGIBLE_HANDLES.has(productHandle);
 }
 
 function getDisplayVariantTitle(baseVariantTitle: string, isSubscription: boolean) {
@@ -136,20 +213,11 @@ function normalizeCartLine(line: CartLine): CartLine {
 }
 
 function readStoredAccount(): AccountProfile {
-  if (typeof window === "undefined") {
-    return { signedIn: false, name: "", email: "" };
-  }
-
-  const raw = window.localStorage.getItem(ACCOUNT_STORAGE_KEY);
-  if (!raw) {
-    return { signedIn: false, name: "", email: "" };
-  }
-
-  try {
-    return JSON.parse(raw) as AccountProfile;
-  } catch {
-    return { signedIn: false, name: "", email: "" };
-  }
+  return readStoredValue(
+    ACCOUNT_STORAGE_KEY,
+    { signedIn: false, name: "", email: "" },
+    isAccountProfile
+  );
 }
 
 export function StorefrontProvider({ children }: { children: ReactNode }) {
@@ -167,11 +235,11 @@ export function StorefrontProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    window.localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(lines));
+    writeStoredValue(CART_STORAGE_KEY, lines);
   }, [lines]);
 
   useEffect(() => {
-    window.localStorage.setItem(ACCOUNT_STORAGE_KEY, JSON.stringify(profile));
+    writeStoredValue(ACCOUNT_STORAGE_KEY, profile);
   }, [profile]);
 
   const itemCount = lines.reduce((sum, line) => sum + line.quantity, 0);

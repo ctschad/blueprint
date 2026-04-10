@@ -1,10 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import { OptimizedImage } from "@/components/optimized-image";
 import { useCart } from "@/components/storefront-provider";
 import { formatMoney } from "@/lib/money";
-
-const SUBSCRIPTION_INELIGIBLE_HANDLES = new Set(["laser-cap"]);
+import { isSubscriptionEligible } from "@/lib/subscription-eligibility";
 
 export function CartPageView() {
   const { lines, subtotal, updateQuantity, removeLine, toggleSubscription } = useCart();
@@ -37,7 +37,14 @@ export function CartPageView() {
             <article key={line.id} className="cart-page__line">
               <div className="cart-page__media">
                 <Link href={`/products/${line.productHandle}`} className="cart-page__image-link">
-                  {line.image ? <img src={line.image} alt={line.productTitle} className="cart-page__image" /> : null}
+                  {line.image ? (
+                    <OptimizedImage
+                      src={line.image}
+                      alt={line.productTitle}
+                      className="cart-page__image"
+                      sizes="6.5rem"
+                    />
+                  ) : null}
                 </Link>
                 <p className="cart-page__price">{formatMoney(line.price)}</p>
               </div>
@@ -45,7 +52,7 @@ export function CartPageView() {
                 <div className="cart-page__copy">
                   <h2>{line.productTitle}</h2>
                   {line.variantTitle ? <p className="cart-page__variant">{line.variantTitle}</p> : null}
-                  {!SUBSCRIPTION_INELIGIBLE_HANDLES.has(line.productHandle) ? (
+                  {isSubscriptionEligible(line.productHandle) ? (
                     <label className="cart-page__subscription-option">
                       <input
                         type="checkbox"

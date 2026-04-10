@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { AddToCartButton } from "@/components/add-to-cart-button";
+import { OptimizedImage } from "@/components/optimized-image";
 import { formatMoney } from "@/lib/money";
+import { isSubscriptionEligible } from "@/lib/subscription-eligibility";
 import type { Product } from "@/lib/types";
 
 export function ProductCard({ product }: { product: Product }) {
@@ -10,7 +12,14 @@ export function ProductCard({ product }: { product: Product }) {
   return (
     <article className="product-card">
       <Link href={`/products/${product.handle}`} className="product-card__image-wrap">
-        {image ? <img src={image.src} alt={image.alt} className="product-card__image" /> : null}
+        {image ? (
+          <OptimizedImage
+            src={image.src}
+            alt={image.alt}
+            className="product-card__image"
+            sizes="(min-width: 1200px) 22vw, (min-width: 768px) 33vw, 80vw"
+          />
+        ) : null}
       </Link>
 
       <div className="product-card__body">
@@ -32,7 +41,7 @@ export function ProductCard({ product }: { product: Product }) {
         <div className="product-card__footer">
           <div>
             <p className="product-card__price">{formatMoney(product.priceMin)}</p>
-            {product.sellingPlanGroups.length > 0 ? (
+            {product.sellingPlanGroups.length > 0 && isSubscriptionEligible(product.handle) ? (
               <p className="product-card__subscription">Subscription available</p>
             ) : null}
           </div>

@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import { OptimizedImage } from "@/components/optimized-image";
+import { RichContentRenderer } from "@/components/rich-content-renderer";
 import type { CoaCategory, CoaPageData } from "@/lib/types";
 
 const CATEGORY_OPTIONS: Array<{
@@ -87,7 +89,12 @@ export function CoasPage({ data }: { data: CoaPageData }) {
             </div>
 
             <Link href={entry.href} className="coas-card__image-wrap">
-              <img src={entry.image} alt={entry.title} className="coas-card__image" />
+              <OptimizedImage
+                src={entry.image}
+                alt={entry.title}
+                className="coas-card__image"
+                sizes="(min-width: 1200px) 24vw, (min-width: 768px) 36vw, 90vw"
+              />
             </Link>
 
             <div className="coas-card__body">
@@ -124,10 +131,9 @@ export function CoasPage({ data }: { data: CoaPageData }) {
             {data.faqs.map((faq) => (
               <details key={faq.question} className="coas-faq__item">
                 <summary className="coas-faq__question">{faq.question}</summary>
-                <div
-                  className="coas-faq__answer"
-                  dangerouslySetInnerHTML={{ __html: faq.answerHtml }}
-                />
+                <div className="coas-faq__answer">
+                  <RichContentRenderer blocks={faq.answerBlocks ?? []} />
+                </div>
               </details>
             ))}
           </div>

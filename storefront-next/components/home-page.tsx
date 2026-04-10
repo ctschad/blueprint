@@ -3,6 +3,7 @@ import { BestsellersCarousel } from "@/components/bestsellers-carousel";
 import { EveryBodyBanner } from "@/components/every-body-banner";
 import { HomeCollectionShowcase } from "@/components/home-collection-showcase";
 import { NewsletterSignup } from "@/components/newsletter-signup";
+import { OptimizedImage } from "@/components/optimized-image";
 import { RoutineCarousel } from "@/components/routine-carousel";
 import { StandardsFeature } from "@/components/standards-feature";
 import { TestimonialCarousel } from "@/components/testimonial-carousel";
@@ -38,10 +39,12 @@ export function HomePage() {
     <>
       <section className="shell home-top-banner">
         <div className="home-top-banner__inner">
-          <img
+          <OptimizedImage
             src={homeContent.topBanner.image.src}
             alt={homeContent.topBanner.image.alt}
             className="home-top-banner__image"
+            sizes="100vw"
+            priority
           />
           <div className="home-top-banner__overlay" />
           <div className="home-top-banner__content">
@@ -80,7 +83,14 @@ export function HomePage() {
         <div className="collection-grid">
           {bodyCollections.map((collection) => (
             <Link key={collection.handle} href={`/collections/${collection.handle}`} className="collection-card">
-              {collection.image ? <img src={collection.image} alt={collection.title} className="collection-card__image" /> : null}
+              {collection.image ? (
+                <OptimizedImage
+                  src={collection.image}
+                  alt={collection.title}
+                  className="collection-card__image"
+                  sizes="(min-width: 1200px) 24vw, (min-width: 768px) 33vw, 85vw"
+                />
+              ) : null}
               <div className="collection-card__body">
                 <h3>{collection.title}</h3>
                 <p>{collection.description || "Browse the products in this category."}</p>

@@ -1,3 +1,4 @@
+import { RichContentRenderer } from "@/components/rich-content-renderer";
 import type { StaticPage } from "@/lib/types";
 
 export function CmsPageView({ page }: { page: StaticPage }) {
@@ -13,7 +14,9 @@ export function CmsPageView({ page }: { page: StaticPage }) {
       {page.description ? <p className="section-copy section-copy--narrow">{page.description}</p> : null}
 
       {page.bodyHtml ? (
-        <div className="surface-card cms-content" dangerouslySetInnerHTML={{ __html: page.bodyHtml }} />
+        <div className="surface-card cms-content">
+          <RichContentRenderer blocks={page.bodyBlocks ?? []} />
+        </div>
       ) : (
         <div className="empty-state">
           <h2>This page is still being prepared.</h2>

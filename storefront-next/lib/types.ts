@@ -3,6 +3,71 @@ export type ProductImage = {
   alt: string;
 };
 
+export type RichTextNode =
+  | { type: "text"; text: string }
+  | { type: "lineBreak" }
+  | { type: "emphasis"; children: RichTextNode[] }
+  | { type: "strong"; children: RichTextNode[] }
+  | { type: "code"; children: RichTextNode[] }
+  | { type: "superscript"; children: RichTextNode[] }
+  | { type: "subscript"; children: RichTextNode[] }
+  | {
+      type: "link";
+      href: string;
+      external: boolean;
+      children: RichTextNode[];
+    };
+
+export type RichContentBlock =
+  | {
+      type: "paragraph";
+      children: RichTextNode[];
+    }
+  | {
+      type: "heading";
+      level: 1 | 2 | 3 | 4 | 5 | 6;
+      children: RichTextNode[];
+    }
+  | {
+      type: "list";
+      ordered: boolean;
+      items: RichContentBlock[][];
+    }
+  | {
+      type: "image";
+      src: string;
+      alt: string;
+      caption?: RichTextNode[];
+    }
+  | {
+      type: "quote";
+      blocks: RichContentBlock[];
+    }
+  | {
+      type: "table";
+      head: RichContentBlock[][][] | null;
+      rows: RichContentBlock[][][];
+    }
+  | {
+      type: "embed";
+      kind: "instagram";
+      eyebrow?: string;
+      title: string;
+      copy?: string;
+      href: string;
+      ctaLabel: string;
+    }
+  | {
+      type: "snapshot";
+      body: RichContentBlock[];
+      image?: ProductImage | null;
+      reversed?: boolean;
+      title?: string;
+    }
+  | {
+      type: "divider";
+    };
+
 export type ProductVariant = {
   id: number;
   title: string;
@@ -32,6 +97,7 @@ export type Product = {
   title: string;
   summary: string;
   descriptionHtml: string;
+  descriptionBlocks?: RichContentBlock[];
   vendor: string;
   type: string;
   tags: string[];
@@ -83,6 +149,7 @@ export type Article = {
   publishedLabel?: string | null;
   tags: string[];
   bodyHtml: string;
+  bodyBlocks?: RichContentBlock[];
   relatedArticles: RelatedArticle[];
   relatedProductHandles: string[];
   legacyPath: string;
@@ -94,6 +161,7 @@ export type StaticPage = {
   description: string;
   image?: string | null;
   bodyHtml: string;
+  bodyBlocks?: RichContentBlock[];
   legacyPath: string;
 };
 
@@ -111,6 +179,7 @@ export type CoaEntry = {
 export type CoaFaq = {
   question: string;
   answerHtml: string;
+  answerBlocks?: RichContentBlock[];
 };
 
 export type CoaPageData = {

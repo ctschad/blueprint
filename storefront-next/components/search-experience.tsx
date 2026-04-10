@@ -3,8 +3,8 @@
 import Link from "next/link";
 import {
   startTransition,
-  useDeferredValue,
   useEffect,
+  useMemo,
   useRef,
   useState,
   type FocusEvent,
@@ -12,6 +12,7 @@ import {
   type MouseEvent
 } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import { OptimizedImage } from "@/components/optimized-image";
 
 type SearchProduct = {
   handle: string;
@@ -23,98 +24,29 @@ type SearchProduct = {
   rating: number | null;
   reviewsCount: number | null;
   image: string | null;
-  searchText: string;
 };
 
 type SearchArticle = {
   href: string;
   title: string;
   image: string | null;
-  searchText: string;
+};
+
+type SearchResponse = {
+  articles: SearchArticle[];
+  products: SearchProduct[];
 };
 
 type SearchExperienceProps = {
-  initialQuery: string;
-  products: SearchProduct[];
   favorites: SearchProduct[];
-  articles: SearchArticle[];
+  initialQuery: string;
+  initialResults: SearchResponse;
 };
 
 const moneyFormatter = new Intl.NumberFormat("en-US", {
   style: "currency",
   currency: "USD"
 });
-
-function tokenize(query: string) {
-  return query
-    .trim()
-    .toLowerCase()
-    .split(/\s+/)
-    .filter(Boolean);
-}
-
-function scoreField(value: string, tokens: string[], weight: number) {
-  if (!value.trim()) {
-    return 0;
-  }
-
-  let score = 0;
-  for (const token of tokens) {
-    if (!value.includes(token)) {
-      return 0;
-    }
-
-    if (value === token) {
-      score += 120 * weight;
-      continue;
-    }
-
-    if (value.startsWith(token)) {
-      score += 90 * weight;
-      continue;
-    }
-
-    if (value.includes(` ${token}`) || value.includes(`-${token}`) || value.includes(`| ${token}`)) {
-      score += 60 * weight;
-      continue;
-    }
-
-    score += 36 * weight;
-  }
-
-  return score;
-}
-
-function scoreProduct(product: SearchProduct, query: string) {
-  const tokens = tokenize(query);
-  if (!tokens.length) {
-    return 0;
-  }
-
-  const title = product.title.toLowerCase();
-  const summary = product.summary.toLowerCase();
-  const keywords = product.keywords.toLowerCase();
-  const vendor = product.vendor.toLowerCase();
-  const full = product.searchText;
-
-  const score =
-    scoreField(title, tokens, 9) +
-    scoreField(keywords, tokens, 6) +
-    scoreField(summary, tokens, 4) +
-    scoreField(vendor, tokens, 2) +
-    scoreField(full, tokens, 1);
-
-  return score + Math.round((product.rating ?? 0) * 2);
-}
-
-function scoreArticle(article: SearchArticle, query: string) {
-  const tokens = tokenize(query);
-  if (!tokens.length) {
-    return 0;
-  }
-
-  return scoreField(article.title.toLowerCase(), tokens, 7) + scoreField(article.searchText, tokens, 1);
-}
 
 function SearchIcon() {
   return (
@@ -148,56 +80,66 @@ function renderStars(rating: number | null) {
   );
 }
 
-export function SearchExperience({
-  initialQuery,
-  products,
-  favorites,
-  articles
-}: SearchExperienceProps) {
+export function SearchExperience({ favorites, initialQuery, initialResults }: SearchExperienceProps) {
   const router = useRouter();
   const pathname = usePathname() || "/search";
   const wrapperRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const [query, setQuery] = useState(initialQuery);
   const [isFocused, setIsFocused] = useState(false);
-  const deferredQuery = useDeferredValue(query);
+  const [results, setResults] = useState<SearchResponse>(initialResults);
+  const [resultsQuery, setResultsQuery] = useState(initialQuery.trim());
   const trimmedQuery = query.trim();
-  const normalizedQuery = deferredQuery.trim().toLowerCase();
 
   useEffect(() => {
     setQuery(initialQuery);
-  }, [initialQuery]);
+    setResults(initialResults);
+    setResultsQuery(initialQuery.trim());
+  }, [initialQuery, initialResults]);
 
-  const productResults = normalizedQuery
-    ? products
-        .map((product) => ({
-          product,
-          score: scoreProduct(product, normalizedQuery)
-        }))
-        .filter((item) => item.score > 0)
-        .sort(
-          (left, right) =>
-            right.score - left.score ||
-            (right.product.rating ?? 0) - (left.product.rating ?? 0) ||
-            left.product.title.localeCompare(right.product.title)
-        )
-        .map((item) => item.product)
-    : [];
+  useEffect(() => {
+    const normalizedQuery = trimmedQuery;
 
-  const articleResults = normalizedQuery
-    ? articles
-        .map((article) => ({
-          article,
-          score: scoreArticle(article, normalizedQuery)
-        }))
-        .filter((item) => item.score > 0)
-        .sort((left, right) => right.score - left.score || left.article.title.localeCompare(right.article.title))
-        .map((item) => item.article)
-    : [];
+    if (!normalizedQuery) {
+      setResults({ articles: [], products: [] });
+      setResultsQuery("");
+      return;
+    }
+
+    if (normalizedQuery === resultsQuery) {
+      return;
+    }
+
+    const controller = new AbortController();
+    const timeout = window.setTimeout(async () => {
+      try {
+        const response = await fetch(`/api/search?q=${encodeURIComponent(normalizedQuery)}`, {
+          signal: controller.signal
+        });
+
+        if (!response.ok) {
+          return;
+        }
+
+        const payload = (await response.json()) as SearchResponse;
+        setResults(payload);
+        setResultsQuery(normalizedQuery);
+      } catch (error) {
+        if (error instanceof DOMException && error.name === "AbortError") {
+          return;
+        }
+      }
+    }, 180);
+
+    return () => {
+      controller.abort();
+      window.clearTimeout(timeout);
+    };
+  }, [resultsQuery, trimmedQuery]);
 
   const showSuggestions = isFocused && Boolean(trimmedQuery);
-  const suggestionProducts = productResults.slice(0, 3);
-  const suggestionArticles = articleResults.slice(0, 3);
+  const suggestionProducts = useMemo(() => results.products.slice(0, 3), [results.products]);
+  const suggestionArticles = useMemo(() => results.articles.slice(0, 3), [results.articles]);
 
   const commitSearch = (nextQuery: string) => {
     const normalized = nextQuery.trim();
@@ -218,6 +160,8 @@ export function SearchExperience({
   const handleClear = () => {
     setQuery("");
     setIsFocused(false);
+    setResults({ articles: [], products: [] });
+    setResultsQuery("");
     commitSearch("");
     inputRef.current?.focus();
   };
@@ -239,7 +183,12 @@ export function SearchExperience({
       <div className="search-page__hero">
         {trimmedQuery ? <h1 className="search-page__title">Search results</h1> : null}
 
-        <div ref={wrapperRef} className="search-page__search-wrap" onBlurCapture={handleBlur} onFocusCapture={() => setIsFocused(true)}>
+        <div
+          ref={wrapperRef}
+          className="search-page__search-wrap"
+          onBlurCapture={handleBlur}
+          onFocusCapture={() => setIsFocused(true)}
+        >
           <form action="/search" className="search-box" onSubmit={handleSubmit}>
             <input
               ref={inputRef}
@@ -280,11 +229,18 @@ export function SearchExperience({
                         onMouseDown={handleSuggestionMouseDown}
                         onClick={() => setIsFocused(false)}
                       >
-                        {product.image ? (
-                          <img src={product.image} alt={product.title} className="search-suggestion-item__image" />
-                        ) : (
-                          <div className="search-suggestion-item__image search-suggestion-item__image--empty" />
-                        )}
+                        <div className="search-suggestion-item__image-wrap">
+                          {product.image ? (
+                            <OptimizedImage
+                              src={product.image}
+                              alt={product.title}
+                              className="search-suggestion-item__image"
+                              sizes="5.5rem"
+                            />
+                          ) : (
+                            <div className="search-suggestion-item__image search-suggestion-item__image--empty" />
+                          )}
+                        </div>
                         <div className="search-suggestion-item__copy">
                           <p className="search-suggestion-item__eyebrow">{product.vendor}</p>
                           <p className="search-suggestion-item__title">{product.title}</p>
@@ -308,11 +264,18 @@ export function SearchExperience({
                         onMouseDown={handleSuggestionMouseDown}
                         onClick={() => setIsFocused(false)}
                       >
-                        {article.image ? (
-                          <img src={article.image} alt={article.title} className="search-suggestion-item__image" />
-                        ) : (
-                          <div className="search-suggestion-item__image search-suggestion-item__image--empty" />
-                        )}
+                        <div className="search-suggestion-item__image-wrap">
+                          {article.image ? (
+                            <OptimizedImage
+                              src={article.image}
+                              alt={article.title}
+                              className="search-suggestion-item__image"
+                              sizes="5.5rem"
+                            />
+                          ) : (
+                            <div className="search-suggestion-item__image search-suggestion-item__image--empty" />
+                          )}
+                        </div>
                         <div className="search-suggestion-item__copy">
                           <p className="search-suggestion-item__title">{article.title}</p>
                         </div>
@@ -342,12 +305,19 @@ export function SearchExperience({
       </div>
 
       {trimmedQuery ? (
-        productResults.length ? (
+        results.products.length ? (
           <div className="search-results-grid">
-            {productResults.map((product) => (
+            {results.products.map((product) => (
               <article key={product.handle} className="search-result-card">
                 <Link href={`/products/${product.handle}`} className="search-result-card__image-wrap">
-                  {product.image ? <img src={product.image} alt={product.title} className="search-result-card__image" /> : null}
+                  {product.image ? (
+                    <OptimizedImage
+                      src={product.image}
+                      alt={product.title}
+                      className="search-result-card__image"
+                      sizes="(min-width: 1200px) 18vw, (min-width: 768px) 30vw, 80vw"
+                    />
+                  ) : null}
                 </Link>
                 <Link href={`/products/${product.handle}`} className="search-result-card__title">
                   {product.title}
@@ -374,7 +344,16 @@ export function SearchExperience({
           <div className="search-favorites__list">
             {favorites.map((product) => (
               <Link key={product.handle} href={`/products/${product.handle}`} className="search-favorite-item">
-                {product.image ? <img src={product.image} alt={product.title} className="search-favorite-item__image" /> : null}
+                <div className="search-favorite-item__image-wrap">
+                  {product.image ? (
+                    <OptimizedImage
+                      src={product.image}
+                      alt={product.title}
+                      className="search-favorite-item__image"
+                      sizes="4.75rem"
+                    />
+                  ) : null}
+                </div>
                 <span className="search-favorite-item__title">{product.title}</span>
               </Link>
             ))}

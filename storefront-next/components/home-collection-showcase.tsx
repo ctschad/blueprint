@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { AddToCartButton } from "@/components/add-to-cart-button";
+import { OptimizedImage } from "@/components/optimized-image";
 import { formatMoney } from "@/lib/money";
 import type { Product } from "@/lib/types";
 
@@ -20,7 +21,14 @@ function BenefitProductCard({ product }: { product: Product }) {
   return (
     <article className="benefit-product-card">
       <Link href={`/products/${product.handle}`} className="benefit-product-card__image-wrap">
-        {image ? <img src={image.src} alt={image.alt} className="benefit-product-card__image" /> : null}
+        {image ? (
+          <OptimizedImage
+            src={image.src}
+            alt={image.alt}
+            className="benefit-product-card__image"
+            sizes="(min-width: 1200px) 18vw, (min-width: 768px) 28vw, 80vw"
+          />
+        ) : null}
       </Link>
 
       <div className="benefit-product-card__body">

@@ -1,32 +1,37 @@
 import { spawn, type ChildProcessWithoutNullStreams } from "child_process";
-import { existsSync } from "fs";
-import path from "path";
-
-type WorkerPending = {
-  reject: (error: Error) => void;
-  resolve: (text: string) => void;
-  timeout: NodeJS.Timeout;
-};
+import { getBiomarkersRuntimeAvailability } from "@/lib/biomarkers-runtime-config";
 
 type WorkerMessage =
   | { type: "ready" }
   | { type: "fatal"; error?: string }
   | { type: "response"; id?: string; ok?: boolean; text?: string; error?: string };
 
+type ActiveRequest = {
+  id: string;
+  reject: (error: Error) => void;
+  resolve: (text: string) => void;
+  timeout: NodeJS.Timeout;
+};
+
+type QueuedRequest = {
+  id: string;
+  prompt: string;
+  reject: (error: Error) => void;
+  resolve: (text: string) => void;
+};
+
 type WorkerState = {
+  active: ActiveRequest | null;
   buffer: string;
   nextId: number;
-  pending: Map<string, WorkerPending>;
   process: ChildProcessWithoutNullStreams | null;
+  queue: QueuedRequest[];
   startPromise: Promise<void> | null;
   started: boolean;
 };
 
-const PROJECT_ROOT = process.cwd();
-const MODEL_PATH = "/Users/charlesschad/Downloads/gemma-4-E2B-it.litertlm";
-const PYTHON_PATH = path.join(PROJECT_ROOT, ".venv-litertlm", "bin", "python");
-const WORKER_SCRIPT_PATH = path.join(PROJECT_ROOT, "scripts", "biomarkers_llm_worker.py");
 const REQUEST_TIMEOUT_MS = 60_000;
+const MAX_QUEUED_REQUESTS = 2;
 
 const globalForBiomarkers = globalThis as typeof globalThis & {
   __blueprintBiomarkersWorker?: WorkerState;
@@ -35,10 +40,11 @@ const globalForBiomarkers = globalThis as typeof globalThis & {
 const workerState =
   globalForBiomarkers.__blueprintBiomarkersWorker ??
   (globalForBiomarkers.__blueprintBiomarkersWorker = {
+    active: null,
     buffer: "",
     nextId: 0,
-    pending: new Map(),
     process: null,
+    queue: [],
     startPromise: null,
     started: false
   });
@@ -47,7 +53,7 @@ function isWorkerMessage(value: unknown): value is WorkerMessage {
   return typeof value === "object" && value !== null && "type" in value;
 }
 
-function cleanupWorker(reason: Error) {
+function resetWorkerProcess() {
   if (workerState.process) {
     workerState.process.removeAllListeners();
     workerState.process.kill();
@@ -57,12 +63,22 @@ function cleanupWorker(reason: Error) {
   workerState.buffer = "";
   workerState.startPromise = null;
   workerState.started = false;
+}
 
-  for (const [id, pending] of workerState.pending) {
-    clearTimeout(pending.timeout);
-    pending.reject(new Error(`${reason.message} (${id})`));
+function failActiveRequest(error: Error) {
+  if (!workerState.active) {
+    return;
   }
-  workerState.pending.clear();
+
+  clearTimeout(workerState.active.timeout);
+  workerState.active.reject(error);
+  workerState.active = null;
+}
+
+function scheduleNextRequest() {
+  queueMicrotask(() => {
+    void processQueue();
+  });
 }
 
 function handleWorkerMessage(message: WorkerMessage, startResolve: () => void, startReject: (error: Error) => void) {
@@ -74,24 +90,28 @@ function handleWorkerMessage(message: WorkerMessage, startResolve: () => void, s
 
   if (message.type === "fatal") {
     const error = new Error(message.error || "The Biomarkers worker failed to initialize.");
-    cleanupWorker(error);
+    resetWorkerProcess();
+    failActiveRequest(error);
     startReject(error);
+    scheduleNextRequest();
     return;
   }
 
-  if (message.type === "response" && message.id) {
-    const pending = workerState.pending.get(message.id);
-    if (!pending) return;
-
-    clearTimeout(pending.timeout);
-    workerState.pending.delete(message.id);
-
-    if (message.ok && typeof message.text === "string") {
-      pending.resolve(message.text);
-    } else {
-      pending.reject(new Error(message.error || "The Biomarkers worker returned an invalid response."));
-    }
+  if (message.type !== "response" || !message.id || !workerState.active || workerState.active.id !== message.id) {
+    return;
   }
+
+  const active = workerState.active;
+  clearTimeout(active.timeout);
+  workerState.active = null;
+
+  if (message.ok && typeof message.text === "string") {
+    active.resolve(message.text);
+  } else {
+    active.reject(new Error(message.error || "The Biomarkers worker returned an invalid response."));
+  }
+
+  scheduleNextRequest();
 }
 
 export async function ensureBiomarkersWorker() {
@@ -103,23 +123,29 @@ export async function ensureBiomarkersWorker() {
     return workerState.startPromise;
   }
 
-  if (!existsSync(PYTHON_PATH)) {
+  const runtime = getBiomarkersRuntimeAvailability();
+
+  if (!runtime.hasPython) {
     throw new Error("LiteRT-LM Python runtime is not installed locally.");
   }
 
-  if (!existsSync(WORKER_SCRIPT_PATH)) {
+  if (!runtime.hasWorkerScript) {
     throw new Error("Biomarkers worker script is missing.");
   }
 
-  if (!existsSync(MODEL_PATH)) {
+  if (!runtime.hasModel) {
     throw new Error("The local Gemma model file was not found.");
   }
 
   workerState.startPromise = new Promise<void>((resolve, reject) => {
-    const child = spawn(PYTHON_PATH, [WORKER_SCRIPT_PATH, "--model", MODEL_PATH, "--backend", "cpu"], {
-      cwd: PROJECT_ROOT,
-      stdio: ["pipe", "pipe", "pipe"]
-    });
+    const child = spawn(
+      runtime.pythonPath,
+      [runtime.workerScriptPath, "--model", runtime.modelPath, "--backend", runtime.backend],
+      {
+        cwd: runtime.projectRoot,
+        stdio: ["pipe", "pipe", "pipe"]
+      }
+    );
 
     workerState.process = child;
     workerState.buffer = "";
@@ -141,7 +167,7 @@ export async function ensureBiomarkersWorker() {
               handleWorkerMessage(parsed, resolve, reject);
             }
           } catch {
-            // Ignore any non-JSON noise from the runtime.
+            // Ignore non-JSON runtime noise from the Python process.
           }
         }
 
@@ -152,8 +178,10 @@ export async function ensureBiomarkersWorker() {
     child.stderr.setEncoding("utf8");
 
     child.on("error", (error) => {
-      cleanupWorker(error);
+      resetWorkerProcess();
+      failActiveRequest(error);
       reject(error);
+      scheduleNextRequest();
     });
 
     child.on("exit", (code, signal) => {
@@ -162,10 +190,12 @@ export async function ensureBiomarkersWorker() {
           ? `The Biomarkers worker stopped unexpectedly (${signal || code || "unknown"}).`
           : `The Biomarkers worker failed to start (${signal || code || "unknown"}).`
       );
-      cleanupWorker(error);
+      resetWorkerProcess();
+      failActiveRequest(error);
       if (!workerState.started) {
         reject(error);
       }
+      scheduleNextRequest();
     });
   }).finally(() => {
     if (!workerState.started) {
@@ -176,30 +206,68 @@ export async function ensureBiomarkersWorker() {
   return workerState.startPromise;
 }
 
-export async function askBiomarkersWorker(prompt: string) {
-  await ensureBiomarkersWorker();
+async function processQueue() {
+  if (workerState.active || workerState.queue.length === 0) {
+    return;
+  }
+
+  const next = workerState.queue.shift();
+  if (!next) {
+    return;
+  }
+
+  try {
+    await ensureBiomarkersWorker();
+  } catch (error) {
+    next.reject(error instanceof Error ? error : new Error("The Biomarkers worker is unavailable."));
+    scheduleNextRequest();
+    return;
+  }
 
   if (!workerState.process || !workerState.process.stdin.writable) {
-    throw new Error("The Biomarkers worker is unavailable.");
+    next.reject(new Error("The Biomarkers worker is unavailable."));
+    scheduleNextRequest();
+    return;
+  }
+
+  const timeout = setTimeout(() => {
+    if (!workerState.active || workerState.active.id !== next.id) {
+      return;
+    }
+
+    const timeoutError = new Error("The Biomarkers worker timed out.");
+    resetWorkerProcess();
+    failActiveRequest(timeoutError);
+    scheduleNextRequest();
+  }, REQUEST_TIMEOUT_MS);
+
+  workerState.active = {
+    id: next.id,
+    reject: next.reject,
+    resolve: next.resolve,
+    timeout
+  };
+
+  try {
+    workerState.process.stdin.write(`${JSON.stringify({ id: next.id, prompt: next.prompt })}\n`);
+  } catch (error) {
+    clearTimeout(timeout);
+    workerState.active = null;
+    next.reject(error instanceof Error ? error : new Error("Failed to contact the Biomarkers worker."));
+    resetWorkerProcess();
+    scheduleNextRequest();
+  }
+}
+
+export async function askBiomarkersWorker(prompt: string) {
+  if (workerState.queue.length >= MAX_QUEUED_REQUESTS) {
+    throw new Error("The Biomarkers assistant is at capacity.");
   }
 
   const id = `req-${++workerState.nextId}`;
 
   return new Promise<string>((resolve, reject) => {
-    const timeout = setTimeout(() => {
-      workerState.pending.delete(id);
-      reject(new Error("The Biomarkers worker timed out."));
-      cleanupWorker(new Error("The Biomarkers worker timed out."));
-    }, REQUEST_TIMEOUT_MS);
-
-    workerState.pending.set(id, { reject, resolve, timeout });
-
-    try {
-      workerState.process?.stdin.write(`${JSON.stringify({ id, prompt })}\n`);
-    } catch (error) {
-      clearTimeout(timeout);
-      workerState.pending.delete(id);
-      reject(error instanceof Error ? error : new Error("Failed to contact the Biomarkers worker."));
-    }
+    workerState.queue.push({ id, prompt, reject, resolve });
+    scheduleNextRequest();
   });
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+import { OptimizedImage } from "@/components/optimized-image";
 
 type NewsletterContent = {
   eyebrow: string;
@@ -82,10 +83,11 @@ export function NewsletterSignup({ content }: NewsletterSignupProps) {
     <section className="shell page-section newsletter-signup">
       <div className="newsletter-signup__grid">
         <div className="newsletter-signup__image-wrap">
-          <img
+          <OptimizedImage
             src={content.image.src}
             alt={content.image.alt}
             className="newsletter-signup__image"
+            sizes="(min-width: 1200px) 40vw, 100vw"
           />
         </div>
 

@@ -1532,12 +1532,15 @@ button {
 }
 
 .hero-category-menu__feature-image-link {
+  position: relative;
   display: block;
+  aspect-ratio: 385 / 215;
+  overflow: hidden;
 }
 
 .hero-category-menu__feature-image {
   width: 100%;
-  aspect-ratio: 385 / 215;
+  height: 100%;
   object-fit: cover;
   border: 1px solid rgba(23, 32, 23, 0.08);
   background: #e5e8ee;
@@ -1635,11 +1638,15 @@ button {
 }
 
 .collection-card {
+  display: grid;
+  grid-template-rows: auto 1fr;
   overflow: hidden;
   transition: transform 220ms ease, box-shadow 220ms ease, border-color 220ms ease;
 }
 
 .collection-card__image {
+  width: 100%;
+  height: auto;
   aspect-ratio: 16 / 11;
   object-fit: cover;
   transition: transform 280ms ease;
@@ -1766,7 +1773,9 @@ button {
 }
 
 .benefit-product-card__image-wrap {
+  position: relative;
   display: block;
+  aspect-ratio: 1 / 1;
   overflow: hidden;
   border-radius: 18px;
   background: linear-gradient(180deg, #efeadf, #ebe3d5);
@@ -1774,7 +1783,7 @@ button {
 
 .benefit-product-card__image {
   width: 100%;
-  aspect-ratio: 1 / 1;
+  height: 100%;
   object-fit: cover;
   transition: transform 240ms ease;
 }
@@ -2247,9 +2256,17 @@ button {
 
 .search-suggestion-item__image {
   width: 100%;
-  aspect-ratio: 1 / 1;
+  height: 100%;
   border-radius: 8px;
   object-fit: cover;
+  background: rgba(24, 35, 61, 0.06);
+}
+
+.search-suggestion-item__image-wrap {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  border-radius: 8px;
   background: rgba(24, 35, 61, 0.06);
 }
 
@@ -2331,9 +2348,15 @@ button {
 
 .search-favorite-item__image {
   width: 100%;
-  aspect-ratio: 1 / 1;
+  height: 100%;
   border-radius: 0;
   object-fit: cover;
+}
+
+.search-favorite-item__image-wrap {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
 }
 
 .search-favorite-item__title {
@@ -2348,7 +2371,9 @@ button {
 }
 
 .search-result-card__image-wrap {
+  position: relative;
   display: block;
+  aspect-ratio: 1 / 1.08;
   overflow: hidden;
   border-radius: 14px;
   background: rgba(24, 35, 61, 0.04);
@@ -2356,7 +2381,7 @@ button {
 
 .search-result-card__image {
   width: 100%;
-  aspect-ratio: 1 / 1.08;
+  height: 100%;
   object-fit: cover;
 }
 
@@ -2441,8 +2466,16 @@ button {
 
 .product-gallery__main-image {
   width: 100%;
-  aspect-ratio: 1 / 1;
+  height: auto;
   object-fit: cover;
+}
+
+.product-gallery__stage {
+  aspect-ratio: 1 / 1;
+}
+
+.product-gallery__stage .product-gallery__main-image {
+  height: 100%;
 }
 
 .product-gallery__thumbs {
@@ -2452,6 +2485,7 @@ button {
 }
 
 .product-gallery__thumb {
+  aspect-ratio: 1 / 1;
   border-radius: 16px;
   border: 1px solid var(--border);
   overflow: hidden;
@@ -2464,6 +2498,12 @@ button {
 .product-gallery__thumb.is-active {
   border-color: var(--accent-dark);
   box-shadow: 0 0 0 1px rgba(30, 39, 30, 0.16);
+}
+
+.product-gallery__thumb-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .purchase-card {
@@ -2760,7 +2800,9 @@ button {
 }
 
 .collection-product-card__image-wrap {
+  position: relative;
   display: block;
+  aspect-ratio: 1 / 1;
   overflow: hidden;
   border-radius: 1.6rem;
   background: linear-gradient(180deg, #f4efe6, #ebe3d5);
@@ -2768,7 +2810,7 @@ button {
 
 .collection-product-card__image {
   width: 100%;
-  aspect-ratio: 1 / 1;
+  height: 100%;
   object-fit: cover;
 }
 
@@ -2856,7 +2898,7 @@ button {
   text-decoration: none;
   background-image:
     linear-gradient(180deg, rgba(15, 27, 52, 0.06), rgba(11, 20, 40, 0.48)),
-    url("https://blueprint.bryanjohnson.com/cdn/shop/files/Frame_9__q_af636b897e7c.webp");
+    url("/cdn/shop/files/Frame_9__q_af636b897e7c.webp");
   background-position: center;
   background-size: cover;
   color: #fff;
@@ -3394,7 +3436,7 @@ button {
 .cart-line__image,
 .cart-page__image {
   width: 100%;
-  aspect-ratio: 1 / 1;
+  height: 100%;
   object-fit: cover;
   border-radius: 12px;
   background: rgba(255, 255, 255, 0.6);
@@ -3403,6 +3445,10 @@ button {
 .cart-line__image-link,
 .cart-page__image-link {
   display: block;
+  position: relative;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  border-radius: 12px;
 }
 
 .cart-line__content,
@@ -3487,11 +3533,15 @@ button {
 
 .cart-drawer__upsell-image-wrap {
   display: block;
+  position: relative;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  border-radius: 12px;
 }
 
 .cart-drawer__upsell-image {
   width: 100%;
-  aspect-ratio: 1 / 1;
+  height: 100%;
   object-fit: cover;
   border-radius: 12px;
   background: rgba(255, 255, 255, 0.58);
@@ -4894,7 +4944,7 @@ button {
     min-height: 24rem;
     background-image:
       linear-gradient(180deg, rgba(15, 27, 52, 0.08), rgba(11, 20, 40, 0.48)),
-      url("https://blueprint.bryanjohnson.com/cdn/shop/files/Frame_9__q_5376b3b50393.webp");
+      url("/cdn/shop/files/Frame_9__q_5376b3b50393.webp");
   }
 
   .collection-promo-card h2 {

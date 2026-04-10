@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { AddToCartButton } from "@/components/add-to-cart-button";
+import { OptimizedImage } from "@/components/optimized-image";
 import { formatMoney } from "@/lib/money";
 import type { Product } from "@/lib/types";
 
@@ -28,7 +29,14 @@ export function CollectionProductCard({ product }: { product: Product }) {
   return (
     <article className="collection-product-card">
       <Link href={`/products/${product.handle}`} className="collection-product-card__image-wrap">
-        {image ? <img src={image} alt={imageAlt} className="collection-product-card__image" /> : null}
+        {image ? (
+          <OptimizedImage
+            src={image}
+            alt={imageAlt}
+            className="collection-product-card__image"
+            sizes="(min-width: 1200px) 24vw, (min-width: 768px) 33vw, 85vw"
+          />
+        ) : null}
       </Link>
 
       <div className="collection-product-card__body">

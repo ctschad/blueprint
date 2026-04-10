@@ -59,8 +59,12 @@ export function BiomarkersLlmAssistant({
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
+    if (messages.length === 0 && !isBusy) {
+      return;
+    }
+
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
-  }, [messages]);
+  }, [isBusy, messages]);
 
   const statusLabel = useMemo(() => {
     switch (status) {
