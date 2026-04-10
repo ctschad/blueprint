@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { BiomarkersHealthImpacts } from "./biomarkers-health-impacts";
 import { BiomarkersFaq } from "./biomarkers-faq";
+import { BiomarkersLlmAssistant } from "./biomarkers-llm-assistant";
 
 const START_URL = "https://biomarkers.bryanjohnson.com/";
 
@@ -230,7 +231,7 @@ export function BiomarkersPage() {
         </div>
       </section>
 
-      <section className="shell page-section biomarkers-benefits">
+      <section id="health-impacts" className="shell page-section biomarkers-benefits">
         <BiomarkersHealthImpacts
           title="Your health impacts how you feel"
           subtitle="When health is dialed in, the rest follows."
@@ -238,6 +239,10 @@ export function BiomarkersPage() {
           items={BENEFIT_AREAS}
           ctaHref={START_URL}
         />
+      </section>
+
+      <section className="shell page-section biomarkers-assistant-section">
+        <BiomarkersLlmAssistant />
       </section>
 
       <section className="shell page-section biomarkers-platform-feature">
