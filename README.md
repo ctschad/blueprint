@@ -1,6 +1,8 @@
 # Blueprint Storefront
 
-Blueprint is a custom storefront rebuilt in **Next.js 15**, **React 19**, and **TypeScript** with a native app architecture, server-backed search, rich content rendering, a local Biomarkers assistant, and a full set of mocked commerce flows for local development.
+Blueprint is copyright Bryan Johnson. All work here is derivative and a POC for an interview application. NONE of this is officially affiliated with Bryan Johson or any of his associated names, works, companies, etc. 
+
+The following is a custom storefront rebuilt in **Next.js 15**, **React 19**, and **TypeScript** with a native app architecture, server-backed search, rich content rendering, a local Biomarkers assistant, and a full set of mocked commerce flows for local development.
 
 The active application lives in [`storefront-next/`](./storefront-next). This README is intentionally focused on that app and the system we built around it.
 
