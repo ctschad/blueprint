@@ -1,4 +1,4 @@
-# Blueprint Storefront
+# Blueprint Storefront POC
 
 Blueprint is copyright Bryan Johnson. All work here is derivative and a POC for an interview application. NONE of this is officially affiliated with Bryan Johson or any of his associated names, works, companies, etc. 
 
